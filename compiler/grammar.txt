@@ -1,0 +1,49 @@
+BNF Grammar for Pseudocode to AlgoLang Compiler
+
+<program> ::= <statement_list>
+
+<statement_list> ::= <statement> <statement_list> | <empty>
+
+<statement> ::= <assignment_stmt>
+              | <if_stmt>
+              | <for_stmt>
+              | <while_stmt>
+              | <func_stmt>
+              | <print_stmt>
+              | <return_stmt>
+
+<assignment_stmt> ::= <identifier> "←" <expression>
+
+<if_stmt> ::= "if" <condition> "then" <statement_list> ["else" <statement_list>] "end if"
+
+<for_stmt> ::= "for" <identifier> "←" <expression> "to" <expression> <statement_list> "end for"
+
+<while_stmt> ::= "while" <condition> "do" <statement_list> "end while"
+
+<func_stmt> ::= "function" <identifier> "(" <param_list> ")" <statement_list> "end function"
+
+<param_list> ::= <identifier> ["," <param_list>] | <empty>
+
+<print_stmt> ::= "print" "(" <expression> ")"
+
+<return_stmt> ::= "return" <expression>
+
+<condition> ::= <expression> <rel_op> <expression>
+
+<rel_op> ::= "=" | "≠" | "<" | ">" | "≤" | "≥"
+
+<expression> ::= <term> [("+" | "-") <expression>]
+
+<term> ::= <factor> [("*" | "/") <term>]
+
+<factor> ::= <identifier>
+           | <number>
+           | "(" <expression> ")"
+           | <func_call>
+
+<func_call> ::= <identifier> "(" <arg_list> ")"
+
+<arg_list> ::= <expression> ["," <arg_list>] | <empty>
+
+<identifier> ::= [a-zA-Z][a-zA-Z0-9]*
+<number> ::= [0-9]+
