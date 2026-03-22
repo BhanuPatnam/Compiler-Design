@@ -1,70 +1,58 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <iostream>
-#include <string>
-#include <vector>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
-using namespace std;
+typedef enum {
+    TOK_IDENTIFIER,
+    TOK_NUMBER,
+    TOK_ASSIGN,      // <- or ←
+    TOK_PLUS,        // +
+    TOK_MINUS,       // -
+    TOK_STAR,        // *
+    TOK_SLASH,       // /
+    TOK_LPAREN,      // (
+    TOK_RPAREN,      // )
+    TOK_COMMA,       // ,
+    TOK_IF,          // if
+    TOK_THEN,        // then
+    TOK_ELSE,        // else
+    TOK_END,         // end
+    TOK_FOR,         // for
+    TOK_TO,          // to
+    TOK_WHILE,       // while
+    TOK_DO,          // do
+    TOK_FUNCTION,    // function
+    TOK_PRINT,       // print
+    TOK_RETURN,      // return
+    TOK_EQ,          // =
+    TOK_NEQ,         // ≠
+    TOK_LT,          // <
+    TOK_GT,          // >
+    TOK_LE,          // ≤
+    TOK_GE,          // ≥
+    TOK_EOF,
+    TOK_UNKNOWN
+} TokenType;
 
-/**
- * @brief Token types supported by our compiler.
- * We include standard operators, control flow keywords, and literals.
- */
-enum class TokenType {
-    IDENTIFIER,
-    NUMBER,
-    ASSIGN,      // <- (Unicode ← also accepted)
-    PLUS,        // +
-    MINUS,       // -
-    STAR,        // *
-    SLASH,       // /
-    LPAREN,      // (
-    RPAREN,      // )
-    COMMA,       // ,
-    IF,          // if
-    THEN,        // then
-    ELSE,        // else
-    END,         // end
-    FOR,         // for
-    TO,          // to
-    WHILE,       // while
-    DO,          // do
-    FUNCTION,    // function
-    PRINT,       // print
-    RETURN,      // return
-    EQ,          // =
-    NEQ,         // ≠
-    LT,          // <
-    GT,          // >
-    LE,          // ≤
-    GE,          // ≥
-    END_OF_FILE,
-    UNKNOWN
-};
-
-struct Token {
+typedef struct {
     TokenType type;
-    string value;
+    char* value;
     int line;
-};
+} Token;
 
-class Lexer {
-public:
-    Lexer(const string& source);
-    vector<Token> tokenize();
-
-private:
-    string source;
+typedef struct {
+    const char* source;
     size_t pos;
     int line;
+} Lexer;
 
-    char peek();
-    char advance();
-    void skipWhitespace();
-    Token readIdentifier();
-    Token readNumber();
-    Token readSymbol();
-};
+Lexer lexer_init(const char* source);
+Token* lexer_tokenize(Lexer* lexer, int* token_count);
+void token_free(Token* token);
+void tokens_free(Token* tokens, int count);
 
 #endif

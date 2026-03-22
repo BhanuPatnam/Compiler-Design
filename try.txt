@@ -1,5 +1,5 @@
 function find_min(a,b)
-    if a<b then 
+    if a=b then 
         return a
     else
         return b

@@ -1,4 +1,4 @@
-BNF Grammar for Pseudocode to AlgoLang Compiler
+BNF Grammar for Pseudocode to C Compiler
 
 <program> ::= <statement_list>
 

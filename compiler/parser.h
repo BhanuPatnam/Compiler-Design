@@ -2,45 +2,119 @@
 #define PARSER_H
 
 #include "lexer.h"
-#include "ast.h"
-#include <iostream>
-#include <vector>
-#include <memory>
 
-using namespace std;
+typedef enum {
+    NODE_NUMBER_EXPR,
+    NODE_VARIABLE_EXPR,
+    NODE_BINARY_EXPR,
+    NODE_FUNCTION_CALL_EXPR,
+    NODE_ASSIGNMENT_STMT,
+    NODE_IF_STMT,
+    NODE_FOR_STMT,
+    NODE_WHILE_STMT,
+    NODE_FUNCTION_STMT,
+    NODE_PRINT_STMT,
+    NODE_RETURN_STMT,
+    NODE_PROGRAM
+} NodeType;
 
-/**
- * @brief A Recursive Descent Parser for pseudocode.
- * It builds an Abstract Syntax Tree (AST) by following the BNF grammar.
- */
-class Parser {
-public:
-    Parser(const vector<Token>& tokens);
-    unique_ptr<ProgramNode> parse();
+struct ASTNode;
 
-private:
-    vector<Token> tokens;
-    size_t pos;
+typedef struct {
+    int value;
+} NumberExpr;
 
-    Token peek();
-    Token advance();
-    bool check(TokenType type);
-    bool match(TokenType type);
-    Token consume(TokenType type, const string& message);
+typedef struct {
+    char* name;
+} VariableExpr;
 
-    unique_ptr<StmtNode> parseStatement();
-    unique_ptr<StmtNode> parseAssignment();
-    unique_ptr<StmtNode> parseIf();
-    unique_ptr<StmtNode> parseFor();
-    unique_ptr<StmtNode> parseWhile();
-    unique_ptr<StmtNode> parseFunction();
-    unique_ptr<StmtNode> parsePrint();
-    unique_ptr<StmtNode> parseReturn();
+typedef struct {
+    char* op;
+    struct ASTNode* left;
+    struct ASTNode* right;
+} BinaryExpr;
 
-    unique_ptr<ExprNode> parseExpression();
-    unique_ptr<ExprNode> parseTerm();
-    unique_ptr<ExprNode> parseFactor();
-    unique_ptr<ExprNode> parsePrimary();
-};
+typedef struct {
+    char* name;
+    struct ASTNode** args;
+    int arg_count;
+} FunctionCallExpr;
+
+typedef struct {
+    char* name;
+    struct ASTNode* value;
+} AssignmentStmt;
+
+typedef struct {
+    struct ASTNode* condition;
+    struct ASTNode** then_branch;
+    int then_count;
+    struct ASTNode** else_branch;
+    int else_count;
+} IfStmt;
+
+typedef struct {
+    char* var;
+    struct ASTNode* start;
+    struct ASTNode* end;
+    struct ASTNode** body;
+    int body_count;
+} ForStmt;
+
+typedef struct {
+    struct ASTNode* condition;
+    struct ASTNode** body;
+    int body_count;
+} WhileStmt;
+
+typedef struct {
+    char* name;
+    char** params;
+    int param_count;
+    struct ASTNode** body;
+    int body_count;
+} FunctionStmt;
+
+typedef struct {
+    struct ASTNode* value;
+} PrintStmt;
+
+typedef struct {
+    struct ASTNode* value;
+} ReturnStmt;
+
+typedef struct {
+    struct ASTNode** statements;
+    int stmt_count;
+} Program;
+
+// ASTNode represents a node in the Parse Tree
+typedef struct ASTNode {
+    NodeType type;
+    union {
+        NumberExpr number;
+        VariableExpr variable;
+        BinaryExpr binary;
+        FunctionCallExpr func_call;
+        AssignmentStmt assignment;
+        IfStmt if_stmt;
+        ForStmt for_stmt;
+        WhileStmt while_stmt;
+        FunctionStmt function;
+        PrintStmt print;
+        ReturnStmt return_stmt;
+        Program program;
+    } data;
+} ASTNode;
+
+typedef struct {
+    Token* tokens;
+    int count;
+    int pos;
+} Parser;
+
+Parser parser_init(Token* tokens, int count);
+ASTNode* parser_parse(Parser* parser);
+void ast_free(ASTNode* node);
 
 #endif

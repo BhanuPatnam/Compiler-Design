@@ -1,39 +1,21 @@
-# Compiler settings
-CXX = g++
-CXXFLAGS = -std=c++14 -Wall -Wextra -I.
+CC = gcc
+CFLAGS = -Wall -Wextra -std=c11 -g
+SRC = main.c lexer.c parser.c codegen.c semantic.c
+OBJ = $(SRC:.c=.o)
+TARGET = ../algocompiler_c
 
-# Project structure
-SRC_DIR = .
-OBJ_DIR = obj
-BIN = ../algocompiler
+all: $(TARGET)
 
-# Source files
-SRCS = $(wildcard $(SRC_DIR)/*.cpp)
-OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+$(TARGET): $(OBJ)
+	$(CC) $(OBJ) -o $(TARGET)
 
-# Default target
-all: $(BIN)
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# Link the executable
-$(BIN): $(OBJS)
-	$(CXX) $(OBJS) -o $(BIN)
-
-# Compile source files to object files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-# Create object directory
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
-
-# Clean up build artifacts
 clean:
-	rm -rf $(OBJ_DIR) $(BIN)
+	rm -f $(OBJ) $(TARGET)
 
-# Run tests
 test: all
-	$(BIN) ../test_input.txt ../output.alg
-	$(BIN) ../test_factorial.txt ../output_factorial.alg
-	$(BIN) ../test_while.txt ../output_while.alg
+	$(TARGET) ../try.txt ../try_output_c.alg
 
 .PHONY: all clean test
