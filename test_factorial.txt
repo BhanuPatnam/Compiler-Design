@@ -6,6 +6,6 @@ function factorial(n)
     end if
 end function
 
-n ← 5
-fact ← factorial(n)
+n <- 5
+fact <- factorial(n)
 print(fact)

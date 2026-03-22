@@ -12,11 +12,11 @@ BNF Grammar for Pseudocode to AlgoLang Compiler
               | <print_stmt>
               | <return_stmt>
 
-<assignment_stmt> ::= <identifier> "←" <expression>
+<assignment_stmt> ::= <identifier> "<-" <expression>
 
 <if_stmt> ::= "if" <condition> "then" <statement_list> ["else" <statement_list>] "end if"
 
-<for_stmt> ::= "for" <identifier> "←" <expression> "to" <expression> <statement_list> "end for"
+<for_stmt> ::= "for" <identifier> "<-" <expression> "to" <expression> <statement_list> "end for"
 
 <while_stmt> ::= "while" <condition> "do" <statement_list> "end while"
 

@@ -8,21 +8,16 @@
 
 using namespace std;
 
-/**
- * @brief The CodeGenerator implements the ASTVisitor interface to produce AlgoLang code.
- * It maintains state such as indentation level and an output string stream.
- */
+// Walks the AST and emits Python-style output (visitor).
 class CodeGenerator : public ASTVisitor {
 public:
     string generate(const ProgramNode& program);
 
-    // Expression visitors
     void visit(const NumberExprNode& node) override;
     void visit(const VariableExprNode& node) override;
     void visit(const BinaryExprNode& node) override;
     void visit(const FunctionCallExprNode& node) override;
 
-    // Statement visitors
     void visit(const AssignmentStmtNode& node) override;
     void visit(const IfStmtNode& node) override;
     void visit(const ForStmtNode& node) override;
@@ -30,8 +25,6 @@ public:
     void visit(const FunctionStmtNode& node) override;
     void visit(const PrintStmtNode& node) override;
     void visit(const ReturnStmtNode& node) override;
-    
-    // Program visitor
     void visit(const ProgramNode& node) override;
 
 private:
@@ -39,6 +32,7 @@ private:
     int indentLevel = 0;
 
     void indent();
+    void emitStmtList(const vector<unique_ptr<StmtNode>>& stmts);
 };
 
 #endif

@@ -6,8 +6,8 @@ function find_min(a,b)
     end if
 end function
 
-x ← 10
-y ← 20
+x <- 10
+y <- 20
 
-min_val ← find_min(x,y)
+min_val <- find_min(x,y)
 print(min_val)

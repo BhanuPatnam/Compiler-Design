@@ -1,13 +1,13 @@
 function calculate_sum(n)
-    sum ← 0
-    for i ← 1 to n
-        sum ← sum + i
+    sum <- 0
+    for i <- 1 to n
+        sum <- sum + i
     end for
     return sum
 end function
 
-n ← 10
-result ← calculate_sum(n)
+n <- 10
+result <- calculate_sum(n)
 print(result)
 
 if result > 50 then

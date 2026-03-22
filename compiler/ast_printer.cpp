@@ -1,8 +1,19 @@
 #include "ast_printer.h"
 
+namespace {
+
+struct IndentGuard {
+    int& level;
+    explicit IndentGuard(int& l) : level(l) { ++level; }
+    ~IndentGuard() { --level; }
+};
+
+}  // namespace
+
 string ASTPrinter::print(const ProgramNode& program) {
     output.str("");
     output.clear();
+    indentLevel = 0;
     program.accept(*this);
     return output.str();
 }
@@ -13,29 +24,34 @@ void ASTPrinter::indent() {
     }
 }
 
+void ASTPrinter::newline() {
+    output << '\n';
+    indent();
+}
+
 void ASTPrinter::parenthesize(const string& name, const ASTNode& node) {
     output << "(" << name;
-    indentLevel++;
-    output << "\n";
-    indent();
-    node.accept(*this);
-    indentLevel--;
-    output << "\n";
-    indent();
+    {
+        IndentGuard g(indentLevel);
+        output << "\n";
+        indent();
+        node.accept(*this);
+    }
+    newline();
     output << ")";
 }
 
 void ASTPrinter::parenthesize(const string& name, const vector<unique_ptr<StmtNode>>& nodes) {
     output << "(" << name;
-    indentLevel++;
-    for (const auto& stmt : nodes) {
-        output << "\n";
-        indent();
-        stmt->accept(*this);
+    {
+        IndentGuard g(indentLevel);
+        for (const auto& stmt : nodes) {
+            output << "\n";
+            indent();
+            stmt->accept(*this);
+        }
     }
-    indentLevel--;
-    output << "\n";
-    indent();
+    newline();
     output << ")";
 }
 
@@ -78,17 +94,16 @@ void ASTPrinter::visit(const IfStmtNode& node) {
     output << "(if ";
     node.condition->accept(*this);
     output << "\n";
-    indentLevel++;
-    indent();
-    parenthesize("then", node.thenBranch);
-    if (!node.elseBranch.empty()) {
-        output << "\n";
+    {
+        IndentGuard g(indentLevel);
         indent();
-        parenthesize("else", node.elseBranch);
+        parenthesize("then", node.thenBranch);
+        if (!node.elseBranch.empty()) {
+            newline();
+            parenthesize("else", node.elseBranch);
+        }
     }
-    indentLevel--;
-    output << "\n";
-    indent();
+    newline();
     output << ")";
 }
 
@@ -98,12 +113,12 @@ void ASTPrinter::visit(const ForStmtNode& node) {
     output << " to ";
     node.end->accept(*this);
     output << "\n";
-    indentLevel++;
-    indent();
-    parenthesize("do", node.body);
-    indentLevel--;
-    output << "\n";
-    indent();
+    {
+        IndentGuard g(indentLevel);
+        indent();
+        parenthesize("do", node.body);
+    }
+    newline();
     output << ")";
 }
 
@@ -111,28 +126,32 @@ void ASTPrinter::visit(const WhileStmtNode& node) {
     output << "(while ";
     node.condition->accept(*this);
     output << "\n";
-    indentLevel++;
-    indent();
-    parenthesize("do", node.body);
-    indentLevel--;
-    output << "\n";
-    indent();
+    {
+        IndentGuard g(indentLevel);
+        indent();
+        parenthesize("do", node.body);
+    }
+    newline();
     output << ")";
 }
 
 void ASTPrinter::visit(const FunctionStmtNode& node) {
     output << "(defun " << node.name << " (";
-    for (size_t i = 0; i < node.params.size(); ++i) {
-        output << node.params[i];
-        if (i < node.params.size() - 1) output << " ";
+    bool first = true;
+    for (const auto& param : node.params) {
+        if (!first) {
+            output << " ";
+        }
+        first = false;
+        output << param;
     }
     output << ")\n";
-    indentLevel++;
-    indent();
-    parenthesize("body", node.body);
-    indentLevel--;
-    output << "\n";
-    indent();
+    {
+        IndentGuard g(indentLevel);
+        indent();
+        parenthesize("body", node.body);
+    }
+    newline();
     output << ")";
 }
 

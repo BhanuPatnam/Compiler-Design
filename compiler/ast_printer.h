@@ -5,10 +5,7 @@
 #include <string>
 #include <sstream>
 
-/**
- * @brief The ASTPrinter uses the Visitor pattern to create a human-readable
- * S-expression style representation of the Abstract Syntax Tree.
- */
+// Prints the AST as indented S-expressions (visitor).
 class ASTPrinter : public ASTVisitor {
 public:
     string print(const ProgramNode& program);
@@ -31,6 +28,7 @@ private:
     int indentLevel = 0;
 
     void indent();
+    void newline();
     void parenthesize(const string& name, const ASTNode& node);
     void parenthesize(const string& name, const vector<unique_ptr<StmtNode>>& nodes);
 };

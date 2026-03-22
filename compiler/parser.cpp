@@ -69,7 +69,7 @@ unique_ptr<StmtNode> Parser::parseStatement() {
 
 unique_ptr<StmtNode> Parser::parseAssignment() {
     Token name = consume(TokenType::IDENTIFIER, "Expected identifier");
-    consume(TokenType::ASSIGN, "Expected '←' in assignment");
+    consume(TokenType::ASSIGN, "Expected '<-' in assignment");
     auto value = parseExpression();
     return make_unique<AssignmentStmtNode>(name.value, move(value));
 }
@@ -98,7 +98,7 @@ unique_ptr<StmtNode> Parser::parseIf() {
 
 unique_ptr<StmtNode> Parser::parseFor() {
     Token var = consume(TokenType::IDENTIFIER, "Expected identifier in for loop");
-    consume(TokenType::ASSIGN, "Expected '←' in for loop");
+    consume(TokenType::ASSIGN, "Expected '<-' in for loop");
     auto start = parseExpression();
     consume(TokenType::TO, "Expected 'to' in for loop");
     auto end = parseExpression();

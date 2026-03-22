@@ -14,7 +14,7 @@ using namespace std;
 enum class TokenType {
     IDENTIFIER,
     NUMBER,
-    ASSIGN,      // ←
+    ASSIGN,      // <- (Unicode ← also accepted)
     PLUS,        // +
     MINUS,       // -
     STAR,        // *

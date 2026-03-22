@@ -74,11 +74,16 @@ Token Lexer::readSymbol() {
         case ')': return {TokenType::RPAREN, ")", line};
         case ',': return {TokenType::COMMA, ",", line};
         case '=': return {TokenType::EQ, "=", line};
-        case '<': return {TokenType::LT, "<", line};
+        case '<':
+            if (peek() == '-') {
+                advance();
+                return {TokenType::ASSIGN, "<-", line};
+            }
+            return {TokenType::LT, "<", line};
         case '>': return {TokenType::GT, ">", line};
     }
 
-    // Handle Unicode symbols (UTF-8)
+    // Handle Unicode symbols (UTF-8). ASCII "<-" is handled under case '<' above.
     // ← : E2 86 90
     // ≠ : E2 89 A0
     // ≤ : E2 89 A4

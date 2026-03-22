@@ -1,12 +1,22 @@
 #include "codegen.h"
-#include <iostream>
 
-using namespace std;
+namespace {
 
-// Stage 3: Code Generation
-// This stage traverses the AST and produces the final "AlgoLang" code.
-// Using the Visitor pattern ensures that each node knows how to 'accept' a visitor,
-// and the visitor knows how to 'visit' each specific node type.
+string normalizeOp(const string& op) {
+    if (op == "=") return "==";
+    if (op == "≠") return "!=";
+    if (op == "≤") return "<=";
+    if (op == "≥") return ">=";
+    return op;
+}
+
+struct IndentGuard {
+    int& level;
+    explicit IndentGuard(int& l) : level(l) { ++level; }
+    ~IndentGuard() { --level; }
+};
+
+}  // namespace
 
 void CodeGenerator::indent() {
     for (int i = 0; i < indentLevel; ++i) {
@@ -14,9 +24,22 @@ void CodeGenerator::indent() {
     }
 }
 
+void CodeGenerator::emitStmtList(const vector<unique_ptr<StmtNode>>& stmts) {
+    if (stmts.empty()) {
+        indent();
+        output << "pass\n";
+    } else {
+        for (const auto& stmt : stmts) {
+            stmt->accept(*this);
+            output << "\n";
+        }
+    }
+}
+
 string CodeGenerator::generate(const ProgramNode& program) {
     output.str("");
     output.clear();
+    indentLevel = 0;
     program.accept(*this);
     return output.str();
 }
@@ -39,23 +62,20 @@ void CodeGenerator::visit(const VariableExprNode& node) {
 void CodeGenerator::visit(const BinaryExprNode& node) {
     output << "(";
     node.left->accept(*this);
-    
-    string op = node.op;
-    if (op == "=") op = "==";
-    else if (op == "≠") op = "!=";
-    else if (op == "≤") op = "<=";
-    else if (op == "≥") op = ">=";
-    
-    output << " " << op << " ";
+    output << " " << normalizeOp(node.op) << " ";
     node.right->accept(*this);
     output << ")";
 }
 
 void CodeGenerator::visit(const FunctionCallExprNode& node) {
     output << node.name << "(";
-    for (size_t i = 0; i < node.args.size(); ++i) {
-        node.args[i]->accept(*this);
-        if (i < node.args.size() - 1) output << ", ";
+    bool first = true;
+    for (const auto& arg : node.args) {
+        if (!first) {
+            output << ", ";
+        }
+        first = false;
+        arg->accept(*this);
     }
     output << ")";
 }
@@ -71,27 +91,17 @@ void CodeGenerator::visit(const IfStmtNode& node) {
     output << "if ";
     node.condition->accept(*this);
     output << ":\n";
-    
-    indentLevel++;
-    if (node.thenBranch.empty()) {
-        indent(); output << "pass\n";
-    } else {
-        for (const auto& s : node.thenBranch) {
-            s->accept(*this);
-            output << "\n";
-        }
+
+    {
+        IndentGuard g(indentLevel);
+        emitStmtList(node.thenBranch);
     }
-    indentLevel--;
 
     if (!node.elseBranch.empty()) {
         indent();
         output << "else:\n";
-        indentLevel++;
-        for (const auto& s : node.elseBranch) {
-            s->accept(*this);
-            output << "\n";
-        }
-        indentLevel--;
+        IndentGuard g(indentLevel);
+        emitStmtList(node.elseBranch);
     }
 }
 
@@ -102,17 +112,9 @@ void CodeGenerator::visit(const ForStmtNode& node) {
     output << ", ";
     node.end->accept(*this);
     output << " + 1):\n";
-    
-    indentLevel++;
-    if (node.body.empty()) {
-        indent(); output << "pass\n";
-    } else {
-        for (const auto& s : node.body) {
-            s->accept(*this);
-            output << "\n";
-        }
-    }
-    indentLevel--;
+
+    IndentGuard g(indentLevel);
+    emitStmtList(node.body);
 }
 
 void CodeGenerator::visit(const WhileStmtNode& node) {
@@ -120,38 +122,26 @@ void CodeGenerator::visit(const WhileStmtNode& node) {
     output << "while ";
     node.condition->accept(*this);
     output << ":\n";
-    
-    indentLevel++;
-    if (node.body.empty()) {
-        indent(); output << "pass\n";
-    } else {
-        for (const auto& s : node.body) {
-            s->accept(*this);
-            output << "\n";
-        }
-    }
-    indentLevel--;
+
+    IndentGuard g(indentLevel);
+    emitStmtList(node.body);
 }
 
 void CodeGenerator::visit(const FunctionStmtNode& node) {
     indent();
     output << "def " << node.name << "(";
-    for (size_t i = 0; i < node.params.size(); ++i) {
-        output << node.params[i];
-        if (i < node.params.size() - 1) output << ", ";
+    bool first = true;
+    for (const auto& param : node.params) {
+        if (!first) {
+            output << ", ";
+        }
+        first = false;
+        output << param;
     }
     output << "):\n";
-    
-    indentLevel++;
-    if (node.body.empty()) {
-        indent(); output << "pass\n";
-    } else {
-        for (const auto& s : node.body) {
-            s->accept(*this);
-            output << "\n";
-        }
-    }
-    indentLevel--;
+
+    IndentGuard g(indentLevel);
+    emitStmtList(node.body);
 }
 
 void CodeGenerator::visit(const PrintStmtNode& node) {

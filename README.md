@@ -5,11 +5,11 @@ This project is a mini-compiler written in C++ that converts algorithms written 
 ## 🚀 Features
 
 The compiler supports:
-- **Variables & Assignment**: Use `←` for assignment (e.g., `x ← 10`).
+- **Variables & Assignment**: Use `<-` for assignment (e.g., `x <- 10`). The Unicode arrow `←` is also accepted.
 - **Arithmetic Operations**: `+`, `-`, `*`, `/` with operator precedence and parentheses.
 - **Control Flow**:
   - `if...then...else...end if`
-  - `for...←...to...end for`
+  - `for...<-...to...end for`
   - `while...do...end while`
 - **Functions**: Define with `function name(params)...end function`.
 - **I/O**: Standard `print(expression)` statements.
