@@ -1,10 +1,14 @@
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef AST_H
+#define AST_H
 
-#include "lexer.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef enum {
-    NODE_NUMBER_EXPR,
+    NODE_INT_EXPR,
+    NODE_FLOAT_EXPR,
+    NODE_CHAR_EXPR,
     NODE_VARIABLE_EXPR,
     NODE_BINARY_EXPR,
     NODE_FUNCTION_CALL_EXPR,
@@ -22,7 +26,15 @@ struct ASTNode;
 
 typedef struct {
     int value;
-} NumberExpr;
+} IntExpr;
+
+typedef struct {
+    float value;
+} FloatExpr;
+
+typedef struct {
+    char value;
+} CharExpr;
 
 typedef struct {
     char* name;
@@ -92,7 +104,9 @@ typedef struct {
 typedef struct ASTNode {
     NodeType type;
     union {
-        NumberExpr number;
+        IntExpr int_expr;
+        FloatExpr float_expr;
+        CharExpr char_expr;
         VariableExpr variable;
         BinaryExpr binary;
         FunctionCallExpr func_call;
@@ -107,14 +121,8 @@ typedef struct ASTNode {
     } data;
 } ASTNode;
 
-typedef struct {
-    Token* tokens;
-    int count;
-    int pos;
-} Parser;
-
-Parser parser_init(Token* tokens, int count);
-ASTNode* parser_parse(Parser* parser);
+// AST Utilities
+ASTNode* create_node(NodeType type);
 void ast_free(ASTNode* node);
 
 #endif

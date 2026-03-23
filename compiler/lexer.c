@@ -1,38 +1,54 @@
 #include "lexer.h"
+#include "y.tab.h"
 
-Lexer lexer_init(const char* source) {
-    Lexer lexer;
-    lexer.source = source;
-    lexer.pos = 0;
-    lexer.line = 1;
-    return lexer;
+// External Bison variables
+extern YYSTYPE yylval;
+char* yytext = NULL;
+FILE* yyin = NULL;
+static Lexer global_lexer;
+static int lexer_initialized = 0;
+
+void lexer_init_with_file(FILE* file) {
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char* source = (char*)malloc(size + 1);
+    fread(source, 1, size, file);
+    source[size] = '\0';
+
+    global_lexer.source = source;
+    global_lexer.pos = 0;
+    global_lexer.line = 1;
+    lexer_initialized = 1;
 }
 
-static char peek(Lexer* lexer) {
-    return lexer->source[lexer->pos];
+void lexer_reset(void) {
+    global_lexer.pos = 0;
+    global_lexer.line = 1;
+    lexer_initialized = 1;
 }
 
-static char advance(Lexer* lexer) {
-    if (lexer->source[lexer->pos] == '\0') return '\0';
-    return lexer->source[lexer->pos++];
+static char peek() {
+    return global_lexer.source[global_lexer.pos];
 }
 
-static void skip_whitespace(Lexer* lexer) {
-    while (isspace(peek(lexer))) {
-        if (peek(lexer) == '\n') lexer->line++;
-        advance(lexer);
+static char advance() {
+    if (global_lexer.source[global_lexer.pos] == '\0') return '\0';
+    return global_lexer.source[global_lexer.pos++];
+}
+
+static void skip_whitespace() {
+    while (isspace(peek())) {
+        if (peek() == '\n') {
+            global_lexer.line++;
+            current_line++;
+        }
+        advance();
     }
 }
 
-static Token create_token(TokenType type, const char* value, int line) {
-    Token token;
-    token.type = type;
-    token.value = strdup(value);
-    token.line = line;
-    return token;
-}
-
-static TokenType lookup_keyword(const char* value) {
+static int lookup_keyword(const char* value) {
     if (strcmp(value, "if") == 0) return TOK_IF;
     if (strcmp(value, "then") == 0) return TOK_THEN;
     if (strcmp(value, "else") == 0) return TOK_ELSE;
@@ -47,110 +63,130 @@ static TokenType lookup_keyword(const char* value) {
     return TOK_IDENTIFIER;
 }
 
-static Token read_identifier(Lexer* lexer) {
-    size_t start = lexer->pos;
-    while (isalnum(peek(lexer)) || peek(lexer) == '_') {
-        advance(lexer);
+int yylex() {
+    if (!lexer_initialized) {
+        if (yyin) {
+            lexer_init_with_file(yyin);
+        } else {
+            return 0; // EOF
+        }
     }
-    size_t len = lexer->pos - start;
-    char* value = (char*)malloc(len + 1);
-    strncpy(value, &lexer->source[start], len);
-    value[len] = '\0';
-    TokenType type = lookup_keyword(value);
-    Token t = create_token(type, value, lexer->line);
-    free(value);
-    return t;
-}
 
-static Token read_number(Lexer* lexer) {
-    size_t start = lexer->pos;
-    while (isdigit(peek(lexer))) {
-        advance(lexer);
+    skip_whitespace();
+
+    char current = peek();
+    if (current == '\0') return 0; // EOF
+
+    size_t start_pos = global_lexer.pos;
+
+    if (isalpha(current) || current == '_') {
+        while (isalnum(peek()) || peek() == '_') {
+            advance();
+        }
+        size_t len = global_lexer.pos - start_pos;
+        if (yytext) free(yytext);
+        yytext = (char*)malloc(len + 1);
+        strncpy(yytext, &global_lexer.source[start_pos], len);
+        yytext[len] = '\0';
+
+        int type = lookup_keyword(yytext);
+        if (type == TOK_IDENTIFIER) {
+            yylval.id = strdup(yytext);
+        }
+        return type;
     }
-    size_t len = lexer->pos - start;
-    char* value = (char*)malloc(len + 1);
-    strncpy(value, &lexer->source[start], len);
-    value[len] = '\0';
-    Token t = create_token(TOK_NUMBER, value, lexer->line);
-    free(value);
-    return t;
-}
 
-static Token read_symbol(Lexer* lexer) {
-    char current = advance(lexer);
+    if (isdigit(current)) {
+        int is_float = 0;
+        while (isdigit(peek())) {
+            advance();
+        }
+        if (peek() == '.') {
+            is_float = 1;
+            advance();
+            while (isdigit(peek())) {
+                advance();
+            }
+        }
+        size_t len = global_lexer.pos - start_pos;
+        if (yytext) free(yytext);
+        yytext = (char*)malloc(len + 1);
+        strncpy(yytext, &global_lexer.source[start_pos], len);
+        yytext[len] = '\0';
+        yylval.id = strdup(yytext);
+        return is_float ? TOK_FLOAT_LITERAL : TOK_INT_LITERAL;
+    }
+
+    if (current == '\'') {
+        advance(); // skip '
+        if (peek() != '\0' && peek() != '\'') {
+            advance(); // the char
+        }
+        if (peek() == '\'') {
+            advance(); // skip '
+        }
+        size_t len = global_lexer.pos - start_pos;
+        if (yytext) free(yytext);
+        yytext = (char*)malloc(len + 1);
+        strncpy(yytext, &global_lexer.source[start_pos], len);
+        yytext[len] = '\0';
+        yylval.id = strdup(yytext);
+        return TOK_CHAR_LITERAL;
+    }
+
+    // Handle symbols
+    advance();
+    size_t len = global_lexer.pos - start_pos;
+    if (yytext) free(yytext);
+    yytext = (char*)malloc(len + 1);
+    strncpy(yytext, &global_lexer.source[start_pos], len);
+    yytext[len] = '\0';
+
     switch (current) {
-        case '+': return create_token(TOK_PLUS, "+", lexer->line);
+        case '+': return TOK_PLUS;
         case '-': {
-            if (peek(lexer) == '>') {
-                advance(lexer);
-                return create_token(TOK_ASSIGN, "->", lexer->line);
+            if (peek() == '>') {
+                advance();
+                free(yytext);
+                yytext = strdup("->");
+                return TOK_ASSIGN;
             }
-            return create_token(TOK_MINUS, "-", lexer->line);
+            return TOK_MINUS;
         }
-        case '*': return create_token(TOK_STAR, "*", lexer->line);
-        case '/': return create_token(TOK_SLASH, "/", lexer->line);
-        case '(': return create_token(TOK_LPAREN, "(", lexer->line);
-        case ')': return create_token(TOK_RPAREN, ")", lexer->line);
-        case ',': return create_token(TOK_COMMA, ",", lexer->line);
-        case '=': return create_token(TOK_EQ, "=", lexer->line);
+        case '*': return TOK_STAR;
+        case '/': return TOK_SLASH;
+        case '(': return TOK_LPAREN;
+        case ')': return TOK_RPAREN;
+        case ',': return TOK_COMMA;
+        case '=': return TOK_EQ;
         case '<': {
-            if (peek(lexer) == '-') {
-                advance(lexer);
-                return create_token(TOK_ASSIGN, "<-", lexer->line);
+            if (peek() == '-') {
+                advance();
+                free(yytext);
+                yytext = strdup("<-");
+                return TOK_ASSIGN;
             }
-            return create_token(TOK_LT, "<", lexer->line);
+            return TOK_LT;
         }
-        case '>': return create_token(TOK_GT, ">", lexer->line);
+        case '>': return TOK_GT;
     }
 
     // Handle UTF-8 (←, ≠, ≤, ≥)
     if ((unsigned char)current == 0xE2) {
-        char next1 = advance(lexer);
-        char next2 = advance(lexer);
-        char symbol[4] = {current, next1, next2, '\0'};
-        if (strcmp(symbol, "←") == 0) return create_token(TOK_ASSIGN, symbol, lexer->line);
-        if (strcmp(symbol, "≠") == 0) return create_token(TOK_NEQ, symbol, lexer->line);
-        if (strcmp(symbol, "≤") == 0) return create_token(TOK_LE, symbol, lexer->line);
-        if (strcmp(symbol, "≥") == 0) return create_token(TOK_GE, symbol, lexer->line);
-        return create_token(TOK_UNKNOWN, symbol, lexer->line);
+        char next1 = advance();
+        char next2 = advance();
+        free(yytext);
+        yytext = (char*)malloc(4);
+        yytext[0] = current;
+        yytext[1] = next1;
+        yytext[2] = next2;
+        yytext[3] = '\0';
+        if (strcmp(yytext, "←") == 0) return TOK_ASSIGN;
+        if (strcmp(yytext, "≠") == 0) return TOK_NEQ;
+        if (strcmp(yytext, "≤") == 0) return TOK_LE;
+        if (strcmp(yytext, "≥") == 0) return TOK_GE;
+        return TOK_UNKNOWN;
     }
 
-    char unknown[2] = {current, '\0'};
-    return create_token(TOK_UNKNOWN, unknown, lexer->line);
-}
-
-Token* lexer_tokenize(Lexer* lexer, int* token_count) {
-    int capacity = 100;
-    Token* tokens = (Token*)malloc(sizeof(Token) * capacity);
-    int count = 0;
-
-    while (peek(lexer) != '\0') {
-        skip_whitespace(lexer);
-        if (peek(lexer) == '\0') break;
-
-        if (count >= capacity - 1) {
-            capacity *= 2;
-            tokens = (Token*)realloc(tokens, sizeof(Token) * capacity);
-        }
-
-        char current = peek(lexer);
-        if (isalpha(current) || current == '_') {
-            tokens[count++] = read_identifier(lexer);
-        } else if (isdigit(current)) {
-            tokens[count++] = read_number(lexer);
-        } else {
-            tokens[count++] = read_symbol(lexer);
-        }
-    }
-
-    tokens[count++] = create_token(TOK_EOF, "", lexer->line);
-    *token_count = count;
-    return tokens;
-}
-
-void tokens_free(Token* tokens, int count) {
-    for (int i = 0; i < count; i++) {
-        free(tokens[i].value);
-    }
-    free(tokens);
+    return TOK_UNKNOWN;
 }

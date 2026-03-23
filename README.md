@@ -43,7 +43,13 @@ cd compiler
 make clean && make
 ```
 
-This will create the `algocompiler_c` executable in the project root.
+By default, the compiler uses a **manual lexer** (`lexer.c`) with a **Bison parser** (`parser.y`). 
+To use **Flex** for lexical analysis instead, run:
+```bash
+make clean && make LEXER=flex
+```
+
+This will create the `algocompiler` executable in the project root.
 
 ## 📖 Usage
 
@@ -51,7 +57,7 @@ This will create the `algocompiler_c` executable in the project root.
 Run the compiler on your pseudocode file:
 
 ```bash
-./algocompiler_c input.txt output.c
+./algocompiler input.txt output.c
 ```
 
 ### 2. Run the Resulting Program

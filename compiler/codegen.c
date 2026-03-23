@@ -26,11 +26,27 @@ static void print_indent(int level, FILE* out) {
     for (int i = 0; i < level; i++) fprintf(out, "    ");
 }
 
+static const char* get_c_type(ASTNode* node) {
+    if (!node) return "int";
+    switch (node->type) {
+        case NODE_INT_EXPR: return "int";
+        case NODE_FLOAT_EXPR: return "float";
+        case NODE_CHAR_EXPR: return "char";
+        default: return "auto"; // C++ auto or just default to int
+    }
+}
+
 static void generate_node(ASTNode* node, int indent_level, FILE* out) {
     if (!node) return;
     switch (node->type) {
-        case NODE_NUMBER_EXPR:
-            fprintf(out, "%d", node->data.number.value);
+        case NODE_INT_EXPR:
+            fprintf(out, "%d", node->data.int_expr.value);
+            break;
+        case NODE_FLOAT_EXPR:
+            fprintf(out, "%g", node->data.float_expr.value);
+            break;
+        case NODE_CHAR_EXPR:
+            fprintf(out, "'%c'", node->data.char_expr.value);
             break;
         case NODE_VARIABLE_EXPR:
             fprintf(out, "%s", node->data.variable.name);
@@ -60,7 +76,9 @@ static void generate_node(ASTNode* node, int indent_level, FILE* out) {
         case NODE_ASSIGNMENT_STMT:
             print_indent(indent_level, out);
             if (!is_declared(node->data.assignment.name)) {
-                fprintf(out, "int %s = ", node->data.assignment.name);
+                const char* type = get_c_type(node->data.assignment.value);
+                if (strcmp(type, "auto") == 0) type = "int";
+                fprintf(out, "%s %s = ", type, node->data.assignment.name);
                 add_symbol(node->data.assignment.name);
             } else {
                 fprintf(out, "%s = ", node->data.assignment.name);
@@ -135,7 +153,11 @@ static void generate_node(ASTNode* node, int indent_level, FILE* out) {
         }
         case NODE_PRINT_STMT:
             print_indent(indent_level, out);
-            fprintf(out, "printf(\"%%d\\n\", ");
+            const char* type = get_c_type(node->data.print.value);
+            const char* fmt = "%d";
+            if (strcmp(type, "float") == 0) fmt = "%f";
+            else if (strcmp(type, "char") == 0) fmt = "%c";
+            fprintf(out, "printf(\"%s\\n\", ", fmt);
             generate_node(node->data.print.value, 0, out);
             fprintf(out, ");\n");
             break;
@@ -187,7 +209,9 @@ void ast_print(ASTNode* node, int indent) {
     if (!node) return;
     print_ast_indent(indent);
     switch (node->type) {
-        case NODE_NUMBER_EXPR: printf("(number %d)\n", node->data.number.value); break;
+        case NODE_INT_EXPR: printf("(int %d)\n", node->data.int_expr.value); break;
+        case NODE_FLOAT_EXPR: printf("(float %g)\n", node->data.float_expr.value); break;
+        case NODE_CHAR_EXPR: printf("(char '%c')\n", node->data.char_expr.value); break;
         case NODE_VARIABLE_EXPR: printf("(var %s)\n", node->data.variable.name); break;
         case NODE_BINARY_EXPR:
             printf("(binary %s\n", node->data.binary.op);

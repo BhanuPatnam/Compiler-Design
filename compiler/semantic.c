@@ -47,7 +47,9 @@ static int check_node(ASTNode* node) {
     int success = 1;
 
     switch (node->type) {
-        case NODE_NUMBER_EXPR: break;
+        case NODE_INT_EXPR:
+        case NODE_FLOAT_EXPR:
+        case NODE_CHAR_EXPR: break;
         case NODE_VARIABLE_EXPR:
             if (!is_symbol_defined(node->data.variable.name)) {
                 fprintf(stderr, "Semantic Error: Undefined variable '%s' used in expression.\n", node->data.variable.name);
