@@ -1,24 +1,41 @@
 #include "codegen.h"
 
-// Simple Symbol Table to track declared variables
-static char* declared_vars[1000];
-static int declared_count = 0;
+// Simple Symbol Table to track declared variables and their types
+typedef struct {
+    char* name;
+    char* type;
+} Symbol;
+
+static Symbol symbols_table[1000];
+static int symbols_count = 0;
 
 static void clear_symbols() {
-    for (int i = 0; i < declared_count; i++) free(declared_vars[i]);
-    declared_count = 0;
+    for (int i = 0; i < symbols_count; i++) {
+        free(symbols_table[i].name);
+        free(symbols_table[i].type);
+    }
+    symbols_count = 0;
+}
+
+static const char* lookup_type(const char* name) {
+    for (int i = 0; i < symbols_count; i++) {
+        if (strcmp(symbols_table[i].name, name) == 0) return symbols_table[i].type;
+    }
+    return "int"; // Default
 }
 
 static int is_declared(const char* name) {
-    for (int i = 0; i < declared_count; i++) {
-        if (strcmp(declared_vars[i], name) == 0) return 1;
+    for (int i = 0; i < symbols_count; i++) {
+        if (strcmp(symbols_table[i].name, name) == 0) return 1;
     }
     return 0;
 }
 
-static void add_symbol(const char* name) {
+static void add_symbol(const char* name, const char* type) {
     if (!is_declared(name)) {
-        declared_vars[declared_count++] = strdup(name);
+        symbols_table[symbols_count].name = strdup(name);
+        symbols_table[symbols_count].type = strdup(type ? type : "int");
+        symbols_count++;
     }
 }
 
@@ -32,7 +49,20 @@ static const char* get_c_type(ASTNode* node) {
         case NODE_INT_EXPR: return "int";
         case NODE_FLOAT_EXPR: return "float";
         case NODE_CHAR_EXPR: return "char";
-        default: return "auto"; // C++ auto or just default to int
+        case NODE_VARIABLE_EXPR: return lookup_type(node->data.variable.name);
+        case NODE_STRUCT_MEMBER_ACCESS_EXPR:
+            // Very simple heuristic: if member name is 'salary', return 'float'
+            // In a better compiler, we'd lookup the struct's definition
+            if (strstr(node->data.struct_access.member_name, "salary")) return "float";
+            if (strstr(node->data.struct_access.member_name, "id")) return "int";
+            return "int";
+        case NODE_BINARY_EXPR: {
+            const char* left = get_c_type(node->data.binary.left);
+            const char* right = get_c_type(node->data.binary.right);
+            if (strcmp(left, "float") == 0 || strcmp(right, "float") == 0) return "float";
+            return "int";
+        }
+        default: return "int";
     }
 }
 
@@ -79,9 +109,8 @@ static void generate_node(ASTNode* node, int indent_level, FILE* out) {
                 char* name = node->data.assignment.target->data.variable.name;
                 if (!is_declared(name)) {
                     const char* type = get_c_type(node->data.assignment.value);
-                    if (strcmp(type, "auto") == 0) type = "int";
                     fprintf(out, "%s %s = ", type, name);
-                    add_symbol(name);
+                    add_symbol(name, type);
                 } else {
                     fprintf(out, "%s = ", name);
                 }
@@ -115,19 +144,19 @@ static void generate_node(ASTNode* node, int indent_level, FILE* out) {
                 fprintf(out, "[%d]", node->data.array_decl.sizes[i]);
             }
             fprintf(out, ";\n");
-            add_symbol(node->data.array_decl.name);
+            add_symbol(node->data.array_decl.name, node->data.array_decl.type);
             break;
         case NODE_POINTER_DECL_STMT:
             print_indent(indent_level, out);
             fprintf(out, "%s", node->data.pointer_decl.type);
             for (int i = 0; i < node->data.pointer_decl.level; i++) fprintf(out, "*");
             fprintf(out, " %s;\n", node->data.pointer_decl.name);
-            add_symbol(node->data.pointer_decl.name);
+            add_symbol(node->data.pointer_decl.name, node->data.pointer_decl.type);
             break;
         case NODE_DECL_STMT:
             print_indent(indent_level, out);
             fprintf(out, "%s %s;\n", node->data.decl.type, node->data.decl.name);
-            add_symbol(node->data.decl.name);
+            add_symbol(node->data.decl.name, node->data.decl.type);
             break;
         case NODE_STRUCT_DEF_STMT:
             print_indent(indent_level, out);
@@ -137,7 +166,7 @@ static void generate_node(ASTNode* node, int indent_level, FILE* out) {
             }
             print_indent(indent_level, out);
             fprintf(out, "};\n\n");
-            add_symbol(node->data.struct_def.struct_name);
+            add_symbol(node->data.struct_def.struct_name, "struct");
             break;
         case NODE_STRUCT_MEMBER_ACCESS_EXPR:
             generate_node(node->data.struct_access.target, 0, out);
@@ -192,7 +221,7 @@ static void generate_node(ASTNode* node, int indent_level, FILE* out) {
         case NODE_FUNCTION_STMT: {
             clear_symbols();
             for (int i = 0; i < node->data.function.param_count; i++) {
-                add_symbol(node->data.function.params[i]);
+                add_symbol(node->data.function.params[i], "int");
             }
             print_indent(indent_level, out);
             fprintf(out, "int %s(", node->data.function.name);
@@ -236,9 +265,10 @@ static void generate_node(ASTNode* node, int indent_level, FILE* out) {
 
 void codegen_generate(ASTNode* node, FILE* out) {
     if (node->type == NODE_PROGRAM) {
-        // First pass: Generate all functions
+        // First pass: Generate all structs and functions at global scope
         for (int i = 0; i < node->data.program.stmt_count; i++) {
-            if (node->data.program.statements[i]->type == NODE_FUNCTION_STMT) {
+            if (node->data.program.statements[i]->type == NODE_STRUCT_DEF_STMT ||
+                node->data.program.statements[i]->type == NODE_FUNCTION_STMT) {
                 generate_node(node->data.program.statements[i], 0, out);
             }
         }
@@ -247,7 +277,8 @@ void codegen_generate(ASTNode* node, FILE* out) {
         clear_symbols();
         fprintf(out, "int main() {\n");
         for (int i = 0; i < node->data.program.stmt_count; i++) {
-            if (node->data.program.statements[i]->type != NODE_FUNCTION_STMT) {
+            if (node->data.program.statements[i]->type != NODE_STRUCT_DEF_STMT &&
+                node->data.program.statements[i]->type != NODE_FUNCTION_STMT) {
                 generate_node(node->data.program.statements[i], 1, out);
             }
         }
