@@ -83,10 +83,11 @@ ASTNode** add_index(ASTNode** list, int* count, ASTNode* index) {
 %token TOK_EQ TOK_NEQ TOK_LT TOK_GT TOK_LE TOK_GE
 %token TOK_ADDR_OF TOK_LBRACKET TOK_RBRACKET
 %token TOK_INT_TYPE TOK_FLOAT_TYPE TOK_CHAR_TYPE
+%token TOK_STRUCT TOK_DOT
 %token TOK_UNKNOWN
 
-%type <node> program statement expression term factor primary lvalue declaration
-%type <stmt_list> statement_list
+%type <node> program statement expression term factor primary lvalue declaration struct_def
+%type <stmt_list> statement_list struct_member_list
 %type <param_list> param_list
 %type <arg_list> arg_list
 %type <level> stars
@@ -191,6 +192,31 @@ statement:
         printf("  [Parsing Rule] Variable/Array declaration matched.\n");
         $$ = $1; 
     }
+    | struct_def {
+        printf("  [Parsing Rule] Struct definition matched.\n");
+        $$ = $1;
+    }
+    ;
+
+struct_def:
+    TOK_STRUCT TOK_IDENTIFIER struct_member_list TOK_END TOK_STRUCT {
+        ASTNode* node = create_node(NODE_STRUCT_DEF_STMT);
+        node->data.struct_def.struct_name = strdup($2);
+        node->data.struct_def.members = $3.list;
+        node->data.struct_def.member_count = $3.count;
+        $$ = node;
+    }
+    ;
+
+struct_member_list:
+    /* empty */ {
+        $$.list = NULL;
+        $$.count = 0;
+    }
+    | struct_member_list declaration {
+        $$.list = add_stmt($1.list, &$1.count, $2);
+        $$.count = $1.count;
+    }
     ;
 
 lvalue:
@@ -211,6 +237,12 @@ lvalue:
         node->data.array_access.name = strdup($1);
         node->data.array_access.indices = $2.list;
         node->data.array_access.index_count = $2.count;
+        $$ = node;
+    }
+    | lvalue TOK_DOT TOK_IDENTIFIER {
+        ASTNode* node = create_node(NODE_STRUCT_MEMBER_ACCESS_EXPR);
+        node->data.struct_access.target = $1;
+        node->data.struct_access.member_name = strdup($3);
         $$ = node;
     }
     ;
@@ -250,6 +282,15 @@ declaration:
         ASTNode* node = create_node(NODE_DECL_STMT);
         node->data.decl.name = strdup($2);
         node->data.decl.type = strdup("char");
+        $$ = node;
+    }
+    | TOK_IDENTIFIER TOK_IDENTIFIER {
+        printf("  [Parsing Rule] Struct instance declaration matched: %s %s\n", $1, $2);
+        ASTNode* node = create_node(NODE_DECL_STMT);
+        node->data.decl.name = strdup($2);
+        char* type = (char*)malloc(strlen($1) + 8);
+        sprintf(type, "struct %s", $1);
+        node->data.decl.type = type;
         $$ = node;
     }
     | TOK_INT_TYPE TOK_IDENTIFIER brackets {
@@ -430,6 +471,12 @@ factor:
         node->data.array_access.name = strdup($1);
         node->data.array_access.indices = $2.list;
         node->data.array_access.index_count = $2.count;
+        $$ = node;
+    }
+    | factor TOK_DOT TOK_IDENTIFIER {
+        ASTNode* node = create_node(NODE_STRUCT_MEMBER_ACCESS_EXPR);
+        node->data.struct_access.target = $1;
+        node->data.struct_access.member_name = strdup($3);
         $$ = node;
     }
     ;

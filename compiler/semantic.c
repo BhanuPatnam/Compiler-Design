@@ -118,8 +118,20 @@ static int check_node(ASTNode* node) {
             define_symbol(node->data.pointer_decl.name);
             break;
         case NODE_DECL_STMT:
-            printf("  [Semantic Trace] Checking variable declaration: %s\n", node->data.decl.name);
+            printf("  [Semantic Trace] Checking variable declaration: %s (type: %s)\n", node->data.decl.name, node->data.decl.type);
             define_symbol(node->data.decl.name);
+            break;
+        case NODE_STRUCT_DEF_STMT:
+            printf("  [Semantic Trace] Checking struct definition: %s\n", node->data.struct_def.struct_name);
+            define_symbol(node->data.struct_def.struct_name);
+            // In a real compiler, we'd also check struct members for validity
+            for (int i = 0; i < node->data.struct_def.member_count; i++) {
+                success &= check_node(node->data.struct_def.members[i]);
+            }
+            break;
+        case NODE_STRUCT_MEMBER_ACCESS_EXPR:
+            printf("  [Semantic Trace] Checking struct member access: .%s\n", node->data.struct_access.member_name);
+            success &= check_node(node->data.struct_access.target);
             break;
         case NODE_IF_STMT:
             printf("  [Semantic Trace] Checking IF statement\n");

@@ -28,6 +28,7 @@ NUMBER      {DIGIT}+
 "while"     { return TOK_WHILE; }
 "do"        { return TOK_DO; }
 "function"  { return TOK_FUNCTION; }
+"struct"    { return TOK_STRUCT; }
 "print"     { return TOK_PRINT; }
 "return"    { return TOK_RETURN; }
 
@@ -35,6 +36,7 @@ NUMBER      {DIGIT}+
 "->"        { return TOK_ASSIGN; }
 "←"         { return TOK_ASSIGN; }
 
+"."         { return TOK_DOT; }
 "+"         { return TOK_PLUS; }
 "-"         { return TOK_MINUS; }
 "*"         { return TOK_STAR; }

@@ -54,6 +54,8 @@ const char* get_token_name(int token) {
         case TOK_INT_TYPE:   return "INT_TYPE";
         case TOK_FLOAT_TYPE: return "FLOAT_TYPE";
         case TOK_CHAR_TYPE:  return "CHAR_TYPE";
+        case TOK_STRUCT:     return "STRUCT";
+        case TOK_DOT:        return "DOT";
         case TOK_UNKNOWN:    return "UNKNOWN";
         default:             return "EOF";
     }

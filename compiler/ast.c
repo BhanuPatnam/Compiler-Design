@@ -55,6 +55,15 @@ void ast_free(ASTNode* node) {
             free(node->data.decl.name);
             free(node->data.decl.type);
             break;
+        case NODE_STRUCT_DEF_STMT:
+            free(node->data.struct_def.struct_name);
+            for (int i = 0; i < node->data.struct_def.member_count; i++) ast_free(node->data.struct_def.members[i]);
+            free(node->data.struct_def.members);
+            break;
+        case NODE_STRUCT_MEMBER_ACCESS_EXPR:
+            ast_free(node->data.struct_access.target);
+            free(node->data.struct_access.member_name);
+            break;
         case NODE_IF_STMT:
             ast_free(node->data.if_stmt.condition);
             for (int i = 0; i < node->data.if_stmt.then_count; i++) ast_free(node->data.if_stmt.then_branch[i]);

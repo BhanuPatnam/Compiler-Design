@@ -160,8 +160,18 @@ static char* process_icg(ASTNode* node) {
             printf("  alloc_ptr %s\n", node->data.pointer_decl.name);
             return NULL;
         case NODE_DECL_STMT:
-            printf("  alloc %s\n", node->data.decl.name);
+            printf("  alloc %s (type: %s)\n", node->data.decl.name, node->data.decl.type);
             return NULL;
+        case NODE_STRUCT_DEF_STMT:
+            printf("  struct_def %s\n", node->data.struct_def.struct_name);
+            return NULL;
+        case NODE_STRUCT_MEMBER_ACCESS_EXPR: {
+            char* target = process_icg(node->data.struct_access.target);
+            char* temp = new_temp();
+            printf("  %s = %s.%s\n", temp, target, node->data.struct_access.member_name);
+            free(target);
+            return temp;
+        }
         default: return NULL;
     }
 }

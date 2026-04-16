@@ -74,7 +74,9 @@
      TOK_INT_TYPE = 290,
      TOK_FLOAT_TYPE = 291,
      TOK_CHAR_TYPE = 292,
-     TOK_UNKNOWN = 293
+     TOK_STRUCT = 293,
+     TOK_DOT = 294,
+     TOK_UNKNOWN = 295
    };
 #endif
 /* Tokens.  */
@@ -113,7 +115,9 @@
 #define TOK_INT_TYPE 290
 #define TOK_FLOAT_TYPE 291
 #define TOK_CHAR_TYPE 292
-#define TOK_UNKNOWN 293
+#define TOK_STRUCT 293
+#define TOK_DOT 294
+#define TOK_UNKNOWN 295
 
 
 
@@ -150,7 +154,7 @@ typedef union YYSTYPE
     int level;
 }
 /* Line 1529 of yacc.c.  */
-#line 154 "y.tab.h"
+#line 158 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

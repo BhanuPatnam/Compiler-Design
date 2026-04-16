@@ -25,6 +25,8 @@ typedef enum {
     NODE_ARRAY_DECL_STMT,
     NODE_POINTER_DECL_STMT,
     NODE_DECL_STMT,
+    NODE_STRUCT_DEF_STMT,
+    NODE_STRUCT_MEMBER_ACCESS_EXPR,
     NODE_PROGRAM
 } NodeType;
 
@@ -98,6 +100,17 @@ typedef struct {
 } DeclStmt;
 
 typedef struct {
+    char* struct_name;
+    struct ASTNode** members;
+    int member_count;
+} StructDefStmt;
+
+typedef struct {
+    struct ASTNode* target;
+    char* member_name;
+} StructMemberAccessExpr;
+
+typedef struct {
     struct ASTNode* condition;
     struct ASTNode** then_branch;
     int then_count;
@@ -163,6 +176,8 @@ typedef struct ASTNode {
         ArrayDeclStmt array_decl;
         PointerDeclStmt pointer_decl;
         DeclStmt decl;
+        StructDefStmt struct_def;
+        StructMemberAccessExpr struct_access;
         Program program;
     } data;
 } ASTNode;

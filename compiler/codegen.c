@@ -129,6 +129,20 @@ static void generate_node(ASTNode* node, int indent_level, FILE* out) {
             fprintf(out, "%s %s;\n", node->data.decl.type, node->data.decl.name);
             add_symbol(node->data.decl.name);
             break;
+        case NODE_STRUCT_DEF_STMT:
+            print_indent(indent_level, out);
+            fprintf(out, "struct %s {\n", node->data.struct_def.struct_name);
+            for (int i = 0; i < node->data.struct_def.member_count; i++) {
+                generate_node(node->data.struct_def.members[i], indent_level + 1, out);
+            }
+            print_indent(indent_level, out);
+            fprintf(out, "};\n\n");
+            add_symbol(node->data.struct_def.struct_name);
+            break;
+        case NODE_STRUCT_MEMBER_ACCESS_EXPR:
+            generate_node(node->data.struct_access.target, 0, out);
+            fprintf(out, ".%s", node->data.struct_access.member_name);
+            break;
         case NODE_IF_STMT:
             print_indent(indent_level, out);
             fprintf(out, "if ");
@@ -292,6 +306,16 @@ void ast_print(ASTNode* node, int indent) {
             break;
         case NODE_DECL_STMT:
             printf("(decl %s %s)\n", node->data.decl.name, node->data.decl.type);
+            break;
+        case NODE_STRUCT_DEF_STMT:
+            printf("(struct_def %s\n", node->data.struct_def.struct_name);
+            for (int i = 0; i < node->data.struct_def.member_count; i++) ast_print(node->data.struct_def.members[i], indent + 1);
+            print_ast_indent(indent); printf(")\n");
+            break;
+        case NODE_STRUCT_MEMBER_ACCESS_EXPR:
+            printf("(struct_access .%s\n", node->data.struct_access.member_name);
+            ast_print(node->data.struct_access.target, indent + 1);
+            print_ast_indent(indent); printf(")\n");
             break;
         case NODE_PROGRAM:
             printf("(program\n");
