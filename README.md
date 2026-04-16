@@ -54,18 +54,21 @@ This will create the `algocompiler` executable in the project root.
 ## 📖 Usage
 
 ### 1. Compile the Algorithm
-Run the compiler on your pseudocode file (must have a **.alg** extension):
+Use the `alg` command to compile your pseudocode file into a binary executable. This script performs both the translation to C and the compilation to a machine binary.
 
 ```bash
-./algocompiler input.alg output.c
+./alg try.alg
 ```
 
+This will produce:
+- `try.c`: The intermediate C source code.
+- `try`: The executable binary.
+
 ### 2. Run the Resulting Program
-Compile the generated C code with `gcc`:
+Simply execute the generated binary:
 
 ```bash
-gcc output.c -o my_program
-./my_program
+./try
 ```
 
 ### Example
