@@ -4,6 +4,8 @@
 #include "ast.h"
 #include "codegen.h"
 #include "semantic.h"
+#include "icg.h"
+#include "optimization.h"
 #include "y.tab.h"
 #include "lexer.h"
 
@@ -46,6 +48,12 @@ const char* get_token_name(int token) {
         case TOK_GT:         return "GT";
         case TOK_LE:         return "LE";
         case TOK_GE:         return "GE";
+        case TOK_ADDR_OF:    return "ADDR_OF";
+        case TOK_LBRACKET:   return "LBRACKET";
+        case TOK_RBRACKET:   return "RBRACKET";
+        case TOK_INT_TYPE:   return "INT_TYPE";
+        case TOK_FLOAT_TYPE: return "FLOAT_TYPE";
+        case TOK_CHAR_TYPE:  return "CHAR_TYPE";
         case TOK_UNKNOWN:    return "UNKNOWN";
         default:             return "EOF";
     }
@@ -53,12 +61,19 @@ const char* get_token_name(int token) {
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        fprintf(stderr, "Usage: %s <input.txt> <output.c>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <input.alg> <output.c>\n", argv[0]);
         return 1;
     }
 
     const char* input_path = argv[1];
     const char* output_path = argv[2];
+
+    // Check for .alg extension
+    const char* ext = strrchr(input_path, '.');
+    if (!ext || strcmp(ext, ".alg") != 0) {
+        fprintf(stderr, "Error: Input file must have a .alg extension (found '%s')\n", ext ? ext : "none");
+        return 1;
+    }
 
     printf("--- Reading Source File: %s ---\n", input_path);
     FILE* input_file = fopen(input_path, "r");
@@ -67,8 +82,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Stage 1: Lexical Analysis
-    printf("\n--- [Stage 1/6] Lexical Analysis: Scanning Tokens ---\n");
+    // Phase 1: Lexical Analysis
+    printf("\n--- [Phase 1/6] Lexical Analysis: Scanning Tokens ---\n");
     yyin = input_file;
     int token;
     while ((token = yylex()) != 0) {
@@ -76,8 +91,8 @@ int main(int argc, char* argv[]) {
     }
     printf("-> Lexical Analysis completed.\n");
 
-    // Stage 2: Syntax Analysis
-    printf("\n--- [Stage 2/6] Syntax Analysis: Parsing ---\n");
+    // Phase 2: Syntax Analysis
+    printf("\n--- [Phase 2/6] Syntax Analysis: Parsing ---\n");
     // Reset lexer to start of file for parsing
     lexer_reset();
     current_line = 1; 
@@ -94,14 +109,10 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "\nNo Parse Tree generated.\n");
         return 1;
     }
-
-    // Stage 3: Parse Tree Construction
-    printf("\n--- [Stage 3/6] Parse Tree Construction ---\n");
     ast_print(final_root, 0);
-    printf("-> Parse Tree constructed successfully.\n");
 
-    // Stage 4: Semantic Analysis
-    printf("\n--- [Stage 4/6] Semantic Analysis ---\n");
+    // Phase 3: Semantic Analysis
+    printf("\n--- [Phase 3/6] Semantic Analysis ---\n");
     if (!semantic_analyze(final_root)) {
         fprintf(stderr, "\nSemantic Analysis Failed! Stopping compilation.\n");
         ast_free(final_root);
@@ -109,14 +120,21 @@ int main(int argc, char* argv[]) {
     }
     printf("-> Semantic Analysis passed successfully.\n");
 
-    // Stage 5: Code Generation (stdout preview)
-    printf("\n--- [Stage 5/6] Code Generation: C (Preview) ---\n");
+    // Phase 4: Intermediate Code Generation
+    printf("\n--- [Phase 4/6] Intermediate Code Generation (TAC) ---\n");
+    generate_icg(final_root);
+    printf("-> Intermediate Code Generation complete.\n");
+
+    // Phase 5: Code Optimization
+    printf("\n--- [Phase 5/6] Code Optimization ---\n");
+    final_root = optimize_ast(final_root);
+    printf("-> Code Optimization complete.\n");
+
+    // Phase 6: Code Generation
+    printf("\n--- [Phase 6/6] Code Generation: C ---\n");
     printf("#include <stdio.h>\n\n");
     codegen_generate(final_root, stdout);
-    printf("\n-> Code generation preview complete.\n");
-
-    // Stage 6: Final Output (File writing)
-    printf("\n--- [Stage 6/6] Final Output: Writing to File ---\n");
+    
     FILE* out = fopen(output_path, "w");
     if (!out) {
         fprintf(stderr, "Error: Could not open output file %s\n", output_path);
@@ -126,8 +144,7 @@ int main(int argc, char* argv[]) {
     fprintf(out, "#include <stdio.h>\n\n");
     codegen_generate(final_root, out);
     fclose(out);
-
-    printf("-> Successfully wrote compiled code to: %s\n", output_path);
+    printf("\n-> Code generation complete. Output saved to: %s\n", output_path);
     printf("\n--- Compilation Summary ---\n");
     printf("Source: %s\nTarget: %s\nStatus: Success\n", input_path, output_path);
 

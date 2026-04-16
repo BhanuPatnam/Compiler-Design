@@ -49,9 +49,25 @@ NUMBER      {DIGIT}+
 "≤"         { return TOK_LE; }
 "≥"         { return TOK_GE; }
 
+"&"         { return TOK_ADDR_OF; }
+"["         { return TOK_LBRACKET; }
+"]"         { return TOK_RBRACKET; }
+"int"       { return TOK_INT_TYPE; }
+"float"     { return TOK_FLOAT_TYPE; }
+"char"      { return TOK_CHAR_TYPE; }
+
 {ID}        { yylval.id = strdup(yytext); return TOK_IDENTIFIER; }
-{NUMBER}    { yylval.id = strdup(yytext); return TOK_NUMBER; }
+{NUMBER}    { yylval.id = strdup(yytext); return TOK_INT_LITERAL; }
+{NUMBER}\.{DIGIT}+ { yylval.id = strdup(yytext); return TOK_FLOAT_LITERAL; }
+"'"."'"     { yylval.id = strdup(yytext); return TOK_CHAR_LITERAL; }
 
 .           { return TOK_UNKNOWN; }
 
 %%
+
+void lexer_reset() {
+    if (yyin) {
+        rewind(yyin);
+        yyrestart(yyin);
+    }
+}

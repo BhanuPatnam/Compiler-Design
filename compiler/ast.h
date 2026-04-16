@@ -19,6 +19,12 @@ typedef enum {
     NODE_FUNCTION_STMT,
     NODE_PRINT_STMT,
     NODE_RETURN_STMT,
+    NODE_DEREF_EXPR,
+    NODE_ADDR_OF_EXPR,
+    NODE_ARRAY_ACCESS_EXPR,
+    NODE_ARRAY_DECL_STMT,
+    NODE_POINTER_DECL_STMT,
+    NODE_DECL_STMT,
     NODE_PROGRAM
 } NodeType;
 
@@ -53,9 +59,43 @@ typedef struct {
 } FunctionCallExpr;
 
 typedef struct {
-    char* name;
+    struct ASTNode* target;
     struct ASTNode* value;
 } AssignmentStmt;
+
+typedef struct {
+    char* name;
+    struct ASTNode* expr;
+    int level;
+} DerefExpr;
+
+typedef struct {
+    char* name;
+} AddrOfExpr;
+
+typedef struct {
+    char* name;
+    struct ASTNode** indices;
+    int index_count;
+} ArrayAccessExpr;
+
+typedef struct {
+    char* name;
+    int* sizes;
+    int dim_count;
+    char* type;
+} ArrayDeclStmt;
+
+typedef struct {
+    char* name;
+    char* type;
+    int level;
+} PointerDeclStmt;
+
+typedef struct {
+    char* name;
+    char* type;
+} DeclStmt;
 
 typedef struct {
     struct ASTNode* condition;
@@ -117,6 +157,12 @@ typedef struct ASTNode {
         FunctionStmt function;
         PrintStmt print;
         ReturnStmt return_stmt;
+        DerefExpr deref;
+        AddrOfExpr addr_of;
+        ArrayAccessExpr array_access;
+        ArrayDeclStmt array_decl;
+        PointerDeclStmt pointer_decl;
+        DeclStmt decl;
         Program program;
     } data;
 } ASTNode;

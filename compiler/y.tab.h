@@ -68,7 +68,13 @@
      TOK_GT = 284,
      TOK_LE = 285,
      TOK_GE = 286,
-     TOK_UNKNOWN = 287
+     TOK_ADDR_OF = 287,
+     TOK_LBRACKET = 288,
+     TOK_RBRACKET = 289,
+     TOK_INT_TYPE = 290,
+     TOK_FLOAT_TYPE = 291,
+     TOK_CHAR_TYPE = 292,
+     TOK_UNKNOWN = 293
    };
 #endif
 /* Tokens.  */
@@ -101,14 +107,20 @@
 #define TOK_GT 284
 #define TOK_LE 285
 #define TOK_GE 286
-#define TOK_UNKNOWN 287
+#define TOK_ADDR_OF 287
+#define TOK_LBRACKET 288
+#define TOK_RBRACKET 289
+#define TOK_INT_TYPE 290
+#define TOK_FLOAT_TYPE 291
+#define TOK_CHAR_TYPE 292
+#define TOK_UNKNOWN 293
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 35 "parser.y"
+#line 48 "parser.y"
 {
     int num;
     float fnum;
@@ -127,9 +139,18 @@ typedef union YYSTYPE
         struct ASTNode** list;
         int count;
     } arg_list;
+    struct {
+        int* list;
+        int count;
+    } size_list;
+    struct {
+        struct ASTNode** list;
+        int count;
+    } index_list;
+    int level;
 }
 /* Line 1529 of yacc.c.  */
-#line 133 "y.tab.h"
+#line 154 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

@@ -54,10 +54,10 @@ This will create the `algocompiler` executable in the project root.
 ## 📖 Usage
 
 ### 1. Compile the Algorithm
-Run the compiler on your pseudocode file:
+Run the compiler on your pseudocode file (must have a **.alg** extension):
 
 ```bash
-./algocompiler input.txt output.c
+./algocompiler input.alg output.c
 ```
 
 ### 2. Run the Resulting Program
@@ -70,7 +70,7 @@ gcc output.c -o my_program
 
 ### Example
 
-**Input (`try.txt`):**
+**Input (`try.alg`):**
 ```
 function find_min(a,b)
     if a < b then 

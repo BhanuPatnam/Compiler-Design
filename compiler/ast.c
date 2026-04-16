@@ -27,8 +27,33 @@ void ast_free(ASTNode* node) {
             free(node->data.func_call.args);
             break;
         case NODE_ASSIGNMENT_STMT:
-            free(node->data.assignment.name);
+            ast_free(node->data.assignment.target);
             ast_free(node->data.assignment.value);
+            break;
+        case NODE_DEREF_EXPR:
+            free(node->data.deref.name);
+            ast_free(node->data.deref.expr);
+            break;
+        case NODE_ADDR_OF_EXPR:
+            free(node->data.addr_of.name);
+            break;
+        case NODE_ARRAY_ACCESS_EXPR:
+            free(node->data.array_access.name);
+            for (int i = 0; i < node->data.array_access.index_count; i++) ast_free(node->data.array_access.indices[i]);
+            free(node->data.array_access.indices);
+            break;
+        case NODE_ARRAY_DECL_STMT:
+            free(node->data.array_decl.name);
+            free(node->data.array_decl.sizes);
+            free(node->data.array_decl.type);
+            break;
+        case NODE_POINTER_DECL_STMT:
+            free(node->data.pointer_decl.name);
+            free(node->data.pointer_decl.type);
+            break;
+        case NODE_DECL_STMT:
+            free(node->data.decl.name);
+            free(node->data.decl.type);
             break;
         case NODE_IF_STMT:
             ast_free(node->data.if_stmt.condition);

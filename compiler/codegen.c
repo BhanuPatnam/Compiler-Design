@@ -75,16 +75,59 @@ static void generate_node(ASTNode* node, int indent_level, FILE* out) {
         }
         case NODE_ASSIGNMENT_STMT:
             print_indent(indent_level, out);
-            if (!is_declared(node->data.assignment.name)) {
-                const char* type = get_c_type(node->data.assignment.value);
-                if (strcmp(type, "auto") == 0) type = "int";
-                fprintf(out, "%s %s = ", type, node->data.assignment.name);
-                add_symbol(node->data.assignment.name);
+            if (node->data.assignment.target->type == NODE_VARIABLE_EXPR) {
+                char* name = node->data.assignment.target->data.variable.name;
+                if (!is_declared(name)) {
+                    const char* type = get_c_type(node->data.assignment.value);
+                    if (strcmp(type, "auto") == 0) type = "int";
+                    fprintf(out, "%s %s = ", type, name);
+                    add_symbol(name);
+                } else {
+                    fprintf(out, "%s = ", name);
+                }
             } else {
-                fprintf(out, "%s = ", node->data.assignment.name);
+                generate_node(node->data.assignment.target, 0, out);
+                fprintf(out, " = ");
             }
             generate_node(node->data.assignment.value, 0, out);
             fprintf(out, ";\n");
+            break;
+        case NODE_DEREF_EXPR:
+            fprintf(out, "(");
+            for (int i = 0; i < node->data.deref.level; i++) fprintf(out, "*");
+            fprintf(out, "%s)", node->data.deref.name);
+            break;
+        case NODE_ADDR_OF_EXPR:
+            fprintf(out, "(&%s)", node->data.addr_of.name);
+            break;
+        case NODE_ARRAY_ACCESS_EXPR:
+            fprintf(out, "%s", node->data.array_access.name);
+            for (int i = 0; i < node->data.array_access.index_count; i++) {
+                fprintf(out, "[");
+                generate_node(node->data.array_access.indices[i], 0, out);
+                fprintf(out, "]");
+            }
+            break;
+        case NODE_ARRAY_DECL_STMT:
+            print_indent(indent_level, out);
+            fprintf(out, "%s %s", node->data.array_decl.type, node->data.array_decl.name);
+            for (int i = 0; i < node->data.array_decl.dim_count; i++) {
+                fprintf(out, "[%d]", node->data.array_decl.sizes[i]);
+            }
+            fprintf(out, ";\n");
+            add_symbol(node->data.array_decl.name);
+            break;
+        case NODE_POINTER_DECL_STMT:
+            print_indent(indent_level, out);
+            fprintf(out, "%s", node->data.pointer_decl.type);
+            for (int i = 0; i < node->data.pointer_decl.level; i++) fprintf(out, "*");
+            fprintf(out, " %s;\n", node->data.pointer_decl.name);
+            add_symbol(node->data.pointer_decl.name);
+            break;
+        case NODE_DECL_STMT:
+            print_indent(indent_level, out);
+            fprintf(out, "%s %s;\n", node->data.decl.type, node->data.decl.name);
+            add_symbol(node->data.decl.name);
             break;
         case NODE_IF_STMT:
             print_indent(indent_level, out);
@@ -225,8 +268,34 @@ void ast_print(ASTNode* node, int indent) {
             print_ast_indent(indent); printf(")\n");
             break;
         case NODE_ASSIGNMENT_STMT:
-            printf("(assign %s\n", node->data.assignment.name);
+            printf("(assign\n");
+            ast_print(node->data.assignment.target, indent + 1);
             ast_print(node->data.assignment.value, indent + 1);
+            print_ast_indent(indent); printf(")\n");
+            break;
+        case NODE_DEREF_EXPR:
+            printf("(deref level=%d %s)\n", node->data.deref.level, node->data.deref.name);
+            break;
+        case NODE_ADDR_OF_EXPR:
+            printf("(addr_of %s)\n", node->data.addr_of.name);
+            break;
+        case NODE_ARRAY_ACCESS_EXPR:
+            printf("(array_access %s\n", node->data.array_access.name);
+            for (int i = 0; i < node->data.array_access.index_count; i++) ast_print(node->data.array_access.indices[i], indent + 1);
+            print_ast_indent(indent); printf(")\n");
+            break;
+        case NODE_ARRAY_DECL_STMT:
+            printf("(array_decl %s dims=%d %s)\n", node->data.array_decl.name, node->data.array_decl.dim_count, node->data.array_decl.type);
+            break;
+        case NODE_POINTER_DECL_STMT:
+            printf("(pointer_decl %s level=%d %s)\n", node->data.pointer_decl.name, node->data.pointer_decl.level, node->data.pointer_decl.type);
+            break;
+        case NODE_DECL_STMT:
+            printf("(decl %s %s)\n", node->data.decl.name, node->data.decl.type);
+            break;
+        case NODE_PROGRAM:
+            printf("(program\n");
+            for (int i = 0; i < node->data.program.stmt_count; i++) ast_print(node->data.program.statements[i], indent + 1);
             print_ast_indent(indent); printf(")\n");
             break;
         case NODE_IF_STMT:
@@ -273,11 +342,6 @@ void ast_print(ASTNode* node, int indent) {
             printf("(return\n");
             ast_print(node->data.return_stmt.value, indent + 1);
             print_ast_indent(indent); printf(")\n");
-            break;
-        case NODE_PROGRAM:
-            printf("(program\n");
-            for (int i = 0; i < node->data.program.stmt_count; i++) ast_print(node->data.program.statements[i], indent + 1);
-            printf(")\n");
             break;
     }
 }

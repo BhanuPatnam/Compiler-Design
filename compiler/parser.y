@@ -30,6 +30,19 @@ ASTNode** add_arg(ASTNode** list, int* count, ASTNode* arg) {
     list[(*count)++] = arg;
     return list;
 }
+
+// Helper for arrays
+int* add_size(int* list, int* count, int size) {
+    list = (int*)realloc(list, sizeof(int) * (*count + 1));
+    list[(*count)++] = size;
+    return list;
+}
+
+ASTNode** add_index(ASTNode** list, int* count, ASTNode* index) {
+    list = (ASTNode**)realloc(list, sizeof(ASTNode*) * (*count + 1));
+    list[(*count)++] = index;
+    return list;
+}
 %}
 
 %union {
@@ -50,6 +63,15 @@ ASTNode** add_arg(ASTNode** list, int* count, ASTNode* arg) {
         struct ASTNode** list;
         int count;
     } arg_list;
+    struct {
+        int* list;
+        int count;
+    } size_list;
+    struct {
+        struct ASTNode** list;
+        int count;
+    } index_list;
+    int level;
 }
 
 %token <id> TOK_IDENTIFIER
@@ -59,12 +81,17 @@ ASTNode** add_arg(ASTNode** list, int* count, ASTNode* arg) {
 %token TOK_IF TOK_THEN TOK_ELSE TOK_END TOK_FOR TOK_TO TOK_WHILE TOK_DO TOK_FUNCTION TOK_PRINT TOK_RETURN
 %token TOK_ASSIGN TOK_PLUS TOK_MINUS TOK_STAR TOK_SLASH TOK_LPAREN TOK_RPAREN TOK_COMMA
 %token TOK_EQ TOK_NEQ TOK_LT TOK_GT TOK_LE TOK_GE
+%token TOK_ADDR_OF TOK_LBRACKET TOK_RBRACKET
+%token TOK_INT_TYPE TOK_FLOAT_TYPE TOK_CHAR_TYPE
 %token TOK_UNKNOWN
 
-%type <node> program statement expression term factor primary
+%type <node> program statement expression term factor primary lvalue declaration
 %type <stmt_list> statement_list
 %type <param_list> param_list
 %type <arg_list> arg_list
+%type <level> stars
+%type <size_list> brackets
+%type <index_list> indices
 
 %left TOK_PLUS TOK_MINUS
 %left TOK_STAR TOK_SLASH
@@ -94,6 +121,7 @@ statement_list:
 
 statement:
     TOK_IF expression TOK_THEN statement_list TOK_ELSE statement_list TOK_END TOK_IF {
+        printf("  [Parsing Rule] If-Then-Else statement matched.\n");
         ASTNode* node = create_node(NODE_IF_STMT);
         node->data.if_stmt.condition = $2;
         node->data.if_stmt.then_branch = $4.list;
@@ -103,6 +131,7 @@ statement:
         $$ = node;
     }
     | TOK_IF expression TOK_THEN statement_list TOK_END TOK_IF {
+        printf("  [Parsing Rule] If-Then statement matched.\n");
         ASTNode* node = create_node(NODE_IF_STMT);
         node->data.if_stmt.condition = $2;
         node->data.if_stmt.then_branch = $4.list;
@@ -112,6 +141,7 @@ statement:
         $$ = node;
     }
     | TOK_FOR TOK_IDENTIFIER TOK_ASSIGN expression TOK_TO expression statement_list TOK_END TOK_FOR {
+        printf("  [Parsing Rule] For loop matched for variable: %s\n", $2);
         ASTNode* node = create_node(NODE_FOR_STMT);
         node->data.for_stmt.var = strdup($2);
         node->data.for_stmt.start = $4;
@@ -121,6 +151,7 @@ statement:
         $$ = node;
     }
     | TOK_WHILE expression TOK_DO statement_list TOK_END TOK_WHILE {
+        printf("  [Parsing Rule] While loop matched.\n");
         ASTNode* node = create_node(NODE_WHILE_STMT);
         node->data.while_stmt.condition = $2;
         node->data.while_stmt.body = $4.list;
@@ -128,6 +159,7 @@ statement:
         $$ = node;
     }
     | TOK_FUNCTION TOK_IDENTIFIER TOK_LPAREN param_list TOK_RPAREN statement_list TOK_END TOK_FUNCTION {
+        printf("  [Parsing Rule] Function definition matched: %s\n", $2);
         ASTNode* node = create_node(NODE_FUNCTION_STMT);
         node->data.function.name = strdup($2);
         node->data.function.params = $4.list;
@@ -137,20 +169,143 @@ statement:
         $$ = node;
     }
     | TOK_PRINT TOK_LPAREN expression TOK_RPAREN {
+        printf("  [Parsing Rule] Print statement matched.\n");
         ASTNode* node = create_node(NODE_PRINT_STMT);
         node->data.print.value = $3;
         $$ = node;
     }
     | TOK_RETURN expression {
+        printf("  [Parsing Rule] Return statement matched.\n");
         ASTNode* node = create_node(NODE_RETURN_STMT);
         node->data.return_stmt.value = $2;
         $$ = node;
     }
-    | TOK_IDENTIFIER TOK_ASSIGN expression {
+    | lvalue TOK_ASSIGN expression {
+        printf("  [Parsing Rule] Assignment statement matched.\n");
         ASTNode* node = create_node(NODE_ASSIGNMENT_STMT);
-        node->data.assignment.name = strdup($1);
+        node->data.assignment.target = $1;
         node->data.assignment.value = $3;
         $$ = node;
+    }
+    | declaration { 
+        printf("  [Parsing Rule] Variable/Array declaration matched.\n");
+        $$ = $1; 
+    }
+    ;
+
+lvalue:
+    TOK_IDENTIFIER {
+        ASTNode* node = create_node(NODE_VARIABLE_EXPR);
+        node->data.variable.name = strdup($1);
+        $$ = node;
+    }
+    | stars TOK_IDENTIFIER {
+        ASTNode* node = create_node(NODE_DEREF_EXPR);
+        node->data.deref.name = strdup($2);
+        node->data.deref.expr = NULL;
+        node->data.deref.level = $1;
+        $$ = node;
+    }
+    | TOK_IDENTIFIER indices {
+        ASTNode* node = create_node(NODE_ARRAY_ACCESS_EXPR);
+        node->data.array_access.name = strdup($1);
+        node->data.array_access.indices = $2.list;
+        node->data.array_access.index_count = $2.count;
+        $$ = node;
+    }
+    ;
+
+stars:
+    TOK_STAR { $$ = 1; }
+    | stars TOK_STAR { $$ = $1 + 1; }
+    ;
+
+indices:
+    TOK_LBRACKET expression TOK_RBRACKET {
+        $$.list = add_index(NULL, &$$.count, $2);
+    }
+    | indices TOK_LBRACKET expression TOK_RBRACKET {
+        $$.list = add_index($1.list, &$1.count, $3);
+        $$.count = $1.count;
+    }
+    ;
+
+declaration:
+    TOK_INT_TYPE TOK_IDENTIFIER {
+        printf("  [Parsing Rule] Simple integer declaration matched.\n");
+        ASTNode* node = create_node(NODE_DECL_STMT);
+        node->data.decl.name = strdup($2);
+        node->data.decl.type = strdup("int");
+        $$ = node;
+    }
+    | TOK_FLOAT_TYPE TOK_IDENTIFIER {
+        printf("  [Parsing Rule] Simple float declaration matched.\n");
+        ASTNode* node = create_node(NODE_DECL_STMT);
+        node->data.decl.name = strdup($2);
+        node->data.decl.type = strdup("float");
+        $$ = node;
+    }
+    | TOK_CHAR_TYPE TOK_IDENTIFIER {
+        printf("  [Parsing Rule] Simple char declaration matched.\n");
+        ASTNode* node = create_node(NODE_DECL_STMT);
+        node->data.decl.name = strdup($2);
+        node->data.decl.type = strdup("char");
+        $$ = node;
+    }
+    | TOK_INT_TYPE TOK_IDENTIFIER brackets {
+        ASTNode* node = create_node(NODE_ARRAY_DECL_STMT);
+        node->data.array_decl.name = strdup($2);
+        node->data.array_decl.sizes = $3.list;
+        node->data.array_decl.dim_count = $3.count;
+        node->data.array_decl.type = strdup("int");
+        $$ = node;
+    }
+    | TOK_FLOAT_TYPE TOK_IDENTIFIER brackets {
+        ASTNode* node = create_node(NODE_ARRAY_DECL_STMT);
+        node->data.array_decl.name = strdup($2);
+        node->data.array_decl.sizes = $3.list;
+        node->data.array_decl.dim_count = $3.count;
+        node->data.array_decl.type = strdup("float");
+        $$ = node;
+    }
+    | TOK_CHAR_TYPE TOK_IDENTIFIER brackets {
+        ASTNode* node = create_node(NODE_ARRAY_DECL_STMT);
+        node->data.array_decl.name = strdup($2);
+        node->data.array_decl.sizes = $3.list;
+        node->data.array_decl.dim_count = $3.count;
+        node->data.array_decl.type = strdup("char");
+        $$ = node;
+    }
+    | TOK_INT_TYPE stars TOK_IDENTIFIER {
+        ASTNode* node = create_node(NODE_POINTER_DECL_STMT);
+        node->data.pointer_decl.name = strdup($3);
+        node->data.pointer_decl.type = strdup("int");
+        node->data.pointer_decl.level = $2;
+        $$ = node;
+    }
+    | TOK_FLOAT_TYPE stars TOK_IDENTIFIER {
+        ASTNode* node = create_node(NODE_POINTER_DECL_STMT);
+        node->data.pointer_decl.name = strdup($3);
+        node->data.pointer_decl.type = strdup("float");
+        node->data.pointer_decl.level = $2;
+        $$ = node;
+    }
+    | TOK_CHAR_TYPE stars TOK_IDENTIFIER {
+        ASTNode* node = create_node(NODE_POINTER_DECL_STMT);
+        node->data.pointer_decl.name = strdup($3);
+        node->data.pointer_decl.type = strdup("char");
+        node->data.pointer_decl.level = $2;
+        $$ = node;
+    }
+    ;
+
+brackets:
+    TOK_LBRACKET TOK_INT_LITERAL TOK_RBRACKET {
+        $$.list = add_size(NULL, &$$.count, atoi($2));
+    }
+    | brackets TOK_LBRACKET TOK_INT_LITERAL TOK_RBRACKET {
+        $$.list = add_size($1.list, &$1.count, atoi($3));
+        $$.count = $1.count;
     }
     ;
 
@@ -171,6 +326,7 @@ param_list:
 expression:
     term { $$ = $1; }
     | expression TOK_PLUS term {
+        printf("  [Parsing Rule] Binary Expression (+) matched.\n");
         ASTNode* node = create_node(NODE_BINARY_EXPR);
         node->data.binary.op = strdup("+");
         node->data.binary.left = $1;
@@ -178,6 +334,7 @@ expression:
         $$ = node;
     }
     | expression TOK_MINUS term {
+        printf("  [Parsing Rule] Binary Expression (-) matched.\n");
         ASTNode* node = create_node(NODE_BINARY_EXPR);
         node->data.binary.op = strdup("-");
         node->data.binary.left = $1;
@@ -185,6 +342,7 @@ expression:
         $$ = node;
     }
     | expression TOK_EQ term {
+        printf("  [Parsing Rule] Comparison Expression (=) matched.\n");
         ASTNode* node = create_node(NODE_BINARY_EXPR);
         node->data.binary.op = strdup("=");
         node->data.binary.left = $1;
@@ -253,6 +411,25 @@ factor:
         node->data.func_call.name = strdup($1);
         node->data.func_call.args = $3.list;
         node->data.func_call.arg_count = $3.count;
+        $$ = node;
+    }
+    | TOK_ADDR_OF TOK_IDENTIFIER {
+        ASTNode* node = create_node(NODE_ADDR_OF_EXPR);
+        node->data.addr_of.name = strdup($2);
+        $$ = node;
+    }
+    | stars TOK_IDENTIFIER {
+        ASTNode* node = create_node(NODE_DEREF_EXPR);
+        node->data.deref.name = strdup($2);
+        node->data.deref.expr = NULL;
+        node->data.deref.level = $1;
+        $$ = node;
+    }
+    | TOK_IDENTIFIER indices {
+        ASTNode* node = create_node(NODE_ARRAY_ACCESS_EXPR);
+        node->data.array_access.name = strdup($1);
+        node->data.array_access.indices = $2.list;
+        node->data.array_access.index_count = $2.count;
         $$ = node;
     }
     ;

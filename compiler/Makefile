@@ -15,7 +15,7 @@ else
     LEX_GEN = 
 endif
 
-SRC = main.c $(LEX_SRC) y.tab.c ast.c codegen.c semantic.c
+SRC = main.c $(LEX_SRC) y.tab.c ast.c codegen.c semantic.c icg.c optimization.c
 OBJ = $(SRC:.c=.o)
 TARGET = ../algocompiler
 
@@ -37,6 +37,6 @@ clean:
 	rm -f *.o lex.yy.c y.tab.c y.tab.h $(TARGET)
 
 test: all
-	$(TARGET) ../try.txt ../try_output.c
+	$(TARGET) ../try.alg ../try_output.c
 
 .PHONY: all clean test

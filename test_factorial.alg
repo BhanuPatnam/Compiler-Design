@@ -7,5 +7,6 @@ function factorial(n)
 end function
 
 n <- 5
+n <- 5 + 0
 fact <- factorial(n)
 print(fact)
