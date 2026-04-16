@@ -70,6 +70,18 @@ int main(int argc, char* argv[]) {
     const char* input_path = argv[1];
     const char* output_path = argv[2];
 
+    // Extract base name for executable
+    char base_name[256]; // Assuming max path length
+    const char* last_slash = strrchr(input_path, '/');
+    const char* filename_start = last_slash ? last_slash + 1 : input_path;
+    char* dot = strrchr(filename_start, '.');
+    if (dot) {
+        strncpy(base_name, filename_start, dot - filename_start);
+        base_name[dot - filename_start] = '\0';
+    } else {
+        strcpy(base_name, filename_start);
+    }
+
     // Check for .alg extension
     const char* ext = strrchr(input_path, '.');
     if (!ext || strcmp(ext, ".alg") != 0) {
@@ -144,8 +156,6 @@ int main(int argc, char* argv[]) {
 
     // Phase 6: Code Generation
     printf("\n--- [Phase 6/6] Code Generation: C ---\n");
-    printf("#include <stdio.h>\n\n");
-    codegen_generate(final_root, stdout);
     
     FILE* out = fopen(output_path, "w");
     if (!out) {
@@ -153,12 +163,25 @@ int main(int argc, char* argv[]) {
         ast_free(final_root);
         return 1;
     }
-    fprintf(out, "#include <stdio.h>\n\n");
+    fprintf(out, "#include <stdio.h>\n#include <math.h>\n\n"); // Add math.h
     codegen_generate(final_root, out);
     fclose(out);
     printf("\n-> Code generation complete. Output saved to: %s\n", output_path);
+
+    // Phase 7: Compilation and Linking
+    printf("\n--- [Phase 7/7] Compiling and Linking C Code ---\n");
+    char compile_command[512];
+    snprintf(compile_command, sizeof(compile_command), "gcc %s -o %s -lm", output_path, base_name);
+    printf("[AlgoCompiler] Linking: %s\n", compile_command);
+    if (system(compile_command) != 0) {
+        fprintf(stderr, "Error: C compilation failed.\n");
+        ast_free(final_root);
+        return 1;
+    }
+    printf("[AlgoCompiler] Success! Run with: ./%s\n", base_name);
+
     printf("\n--- Compilation Summary ---\n");
-    printf("Source: %s\nTarget: %s\nStatus: Success\n", input_path, output_path);
+    printf("Source: %s\nTarget C File: %s\nExecutable: %s\nStatus: Success\n", input_path, output_path, base_name);
 
     // Cleanup
     ast_free(final_root);

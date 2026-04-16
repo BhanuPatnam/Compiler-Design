@@ -17,7 +17,7 @@ endif
 
 SRC = main.c $(LEX_SRC) y.tab.c ast.c codegen.c semantic.c icg.c optimization.c
 OBJ = $(SRC:.c=.o)
-TARGET = ../algocompiler
+TARGET = ../alg
 
 all: $(TARGET)
 
@@ -37,6 +37,9 @@ clean:
 	rm -f *.o lex.yy.c y.tab.c y.tab.h $(TARGET)
 
 test: all
-	$(TARGET) ../try.alg ../try_output.c
+	$(TARGET) tests/try.alg tests/try_output.c
+
+install: all
+	cp $(TARGET) /usr/local/bin/alg
 
 .PHONY: all clean test
