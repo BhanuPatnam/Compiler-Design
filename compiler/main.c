@@ -129,7 +129,17 @@ int main(int argc, char* argv[]) {
 
     // Phase 5: Code Optimization
     printf("\n--- [Phase 5/6] Code Optimization ---\n");
-    final_root = optimize_ast(final_root);
+    int opt_success = 1;
+    final_root = optimize_ast(final_root, &opt_success);
+    if (!opt_success) {
+        fprintf(stderr, "\nOptimization Failed due to critical errors!\n");
+        printf("\n--- Compilation Summary ---\n");
+        printf("Source: %s\n", input_path);
+        printf("Target: %s\n", output_path);
+        printf("Status: Failed (Optimization Phase)\n");
+        ast_free(final_root);
+        return 1;
+    }
     printf("-> Code Optimization complete.\n");
 
     // Phase 6: Code Generation

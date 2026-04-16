@@ -3,6 +3,6 @@
 
 #include "ast.h"
 
-ASTNode* optimize_ast(ASTNode* node);
+ASTNode* optimize_ast(ASTNode* node, int* success);
 
 #endif

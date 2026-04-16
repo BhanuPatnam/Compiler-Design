@@ -4,6 +4,7 @@
 #include <string.h>
 
 static int optimizations_made = 0;
+static int optimization_errors = 0;
 
 static ASTNode* constant_folding(ASTNode* node) {
     if (!node) return NULL;
@@ -12,7 +13,8 @@ static ASTNode* constant_folding(ASTNode* node) {
         node->data.binary.left = constant_folding(node->data.binary.left);
         node->data.binary.right = constant_folding(node->data.binary.right);
 
-        if (node->data.binary.left->type == NODE_INT_EXPR && node->data.binary.right->type == NODE_INT_EXPR) {
+        if (node->data.binary.left && node->data.binary.right && 
+            node->data.binary.left->type == NODE_INT_EXPR && node->data.binary.right->type == NODE_INT_EXPR) {
             int left = node->data.binary.left->data.int_expr.value;
             int right = node->data.binary.right->data.int_expr.value;
             int res = 0;
@@ -23,7 +25,11 @@ static ASTNode* constant_folding(ASTNode* node) {
             else if (strcmp(node->data.binary.op, "*") == 0) res = left * right;
             else if (strcmp(node->data.binary.op, "/") == 0) {
                 if (right != 0) res = left / right;
-                else foldable = 0;
+                else {
+                    printf("  [Optimization Error] Division by zero detected: %d / %d\n", left, right);
+                    optimization_errors++;
+                    foldable = 0;
+                }
             } else foldable = 0;
 
             if (foldable) {
@@ -63,13 +69,20 @@ static ASTNode* constant_folding(ASTNode* node) {
     return node;
 }
 
-ASTNode* optimize_ast(ASTNode* node) {
+ASTNode* optimize_ast(ASTNode* node, int* success) {
     optimizations_made = 0;
+    optimization_errors = 0;
     ASTNode* optimized = constant_folding(node);
     if (optimizations_made == 0) {
         printf("  No constant folding optimizations possible.\n");
     } else {
         printf("  Total optimizations made: %d\n", optimizations_made);
+    }
+    
+    if (optimization_errors > 0) {
+        *success = 0;
+    } else {
+        *success = 1;
     }
     return optimized;
 }
