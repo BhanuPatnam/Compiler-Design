@@ -1,0 +1,9 @@
+Package: alg-compiler
+Version: 1.0-1
+Section: devel
+Priority: optional
+Architecture: amd64
+Maintainer: Bhanu Prakash <patnambhanuprakash@gmail.com>
+Depends: gcc, libc6
+Description: A simple compiler for the ALG language.
+ The ALG compiler translates .alg files to C and then compiles them using gcc. It follows a 7-phase architecture: Lexer, Parser, AST, Semantic, ICG, CodeGen, and Linking.

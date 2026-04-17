@@ -42,4 +42,7 @@ test: all
 install: all
 	cp $(TARGET) /usr/local/bin/alg
 
-.PHONY: all clean test
+deb: all
+	cd .. && ./scripts/build_deb.sh
+
+.PHONY: all clean test install deb

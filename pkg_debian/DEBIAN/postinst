@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+if [ "$1" = "configure" ]; then
+    chmod 755 /usr/bin/alg
+    echo "alg-compiler installed successfully in /usr/bin/alg"
+fi
+exit 0
