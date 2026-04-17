@@ -1,0 +1,9 @@
+Package: algocompiler
+Version: 1.0.0
+Section: devel
+Priority: optional
+Architecture: amd64
+Maintainer: Bhanu Prakash <124CS0008@iiitdmk.ac.in>
+Depends: libc6, gcc
+Description: Pseudocode-to-C11 compiler covering all classical compiler phases
+

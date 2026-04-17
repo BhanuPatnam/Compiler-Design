@@ -103,6 +103,24 @@ cd compiler
 make test
 ```
 
+## Installation
+
+# Step 1 — Get the .deb file (via USB, Google Drive, email, etc.)
+
+# Step 2 — Install it
+
+```bash
+ls -l *.deb
+sudo apt update
+sudo apt install ./algocompiler_1.0.0_<arch>.deb
+```
+
+# Step 3 — Use it
+
+```bash
+algocompiler <input.alg|input.txt> <output.c>
+```
+
 ## 📜 License
 
 This project is created for educational purposes in Compiler Design.

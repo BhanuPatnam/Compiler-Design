@@ -1,0 +1,4 @@
+algocompiler
+*.deb
+package/usr/bin/algocompiler
+
