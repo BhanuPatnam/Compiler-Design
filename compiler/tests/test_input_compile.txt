@@ -1,0 +1,195 @@
+--- Reading Source File: compiler/tests/test_input.alg ---
+
+--- [Phase 1/6] Lexical Analysis: Scanning Tokens ---
+Token: FUNCTION     | Value: function
+Token: IDENTIFIER   | Value: calculate_sum
+Token: LPAREN       | Value: (
+Token: IDENTIFIER   | Value: n
+Token: RPAREN       | Value: )
+Token: IDENTIFIER   | Value: sum
+Token: ASSIGN       | Value: <-
+Token: INT_LITERAL  | Value: 0
+Token: FOR          | Value: for
+Token: IDENTIFIER   | Value: i
+Token: ASSIGN       | Value: <-
+Token: INT_LITERAL  | Value: 1
+Token: TO           | Value: to
+Token: IDENTIFIER   | Value: n
+Token: IDENTIFIER   | Value: sum
+Token: ASSIGN       | Value: <-
+Token: IDENTIFIER   | Value: sum
+Token: PLUS         | Value: +
+Token: IDENTIFIER   | Value: i
+Token: END          | Value: end
+Token: FOR          | Value: for
+Token: RETURN       | Value: return
+Token: IDENTIFIER   | Value: sum
+Token: END          | Value: end
+Token: FUNCTION     | Value: function
+Token: IDENTIFIER   | Value: n
+Token: ASSIGN       | Value: <-
+Token: INT_LITERAL  | Value: 10
+Token: IDENTIFIER   | Value: result
+Token: ASSIGN       | Value: <-
+Token: IDENTIFIER   | Value: calculate_sum
+Token: LPAREN       | Value: (
+Token: IDENTIFIER   | Value: n
+Token: RPAREN       | Value: )
+Token: PRINT        | Value: print
+Token: LPAREN       | Value: (
+Token: IDENTIFIER   | Value: result
+Token: RPAREN       | Value: )
+Token: IF           | Value: if
+Token: IDENTIFIER   | Value: result
+Token: GT           | Value: >
+Token: INT_LITERAL  | Value: 50
+Token: THEN         | Value: then
+Token: PRINT        | Value: print
+Token: LPAREN       | Value: (
+Token: INT_LITERAL  | Value: 1
+Token: RPAREN       | Value: )
+Token: ELSE         | Value: else
+Token: PRINT        | Value: print
+Token: LPAREN       | Value: (
+Token: INT_LITERAL  | Value: 0
+Token: RPAREN       | Value: )
+Token: END          | Value: end
+Token: IF           | Value: if
+-> Lexical Analysis completed.
+
+--- [Phase 2/6] Syntax Analysis: Parsing ---
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Binary Expression (+) matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] For loop matched for variable: i
+  [Parsing Rule] Return statement matched.
+  [Parsing Rule] Function definition matched: calculate_sum
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Print statement matched.
+  [Parsing Rule] Print statement matched.
+  [Parsing Rule] Print statement matched.
+  [Parsing Rule] If-Then-Else statement matched.
+-> Syntax Analysis completed successfully.
+(program
+  (def calculate_sum (n)
+    (assign
+      (var sum)
+      (int 0)
+    )
+    (for i
+      (int 1)
+      (var n)
+    body
+      (assign
+        (var sum)
+        (binary +
+          (var sum)
+          (var i)
+        )
+      )
+    )
+    (return
+      (var sum)
+    )
+  )
+  (assign
+    (var n)
+    (int 10)
+  )
+  (assign
+    (var result)
+    (call calculate_sum
+      (var n)
+    )
+  )
+  (print
+    (var result)
+  )
+  (if
+    (binary >
+      (var result)
+      (int 50)
+    )
+  then
+    (print
+      (int 1)
+    )
+  else
+    (print
+      (int 0)
+    )
+  )
+)
+
+--- [Phase 3/6] Semantic Analysis ---
+  [Semantic Trace] Defining function: calculate_sum
+  [Semantic Trace] Checking function definition: calculate_sum
+  [Semantic Trace] Defining symbol: n
+  [Semantic Trace] Checking assignment to variable: sum
+  [Semantic Trace] Defining symbol: sum
+  [Semantic Trace] Checking FOR loop with variable: i
+  [Semantic Trace] Defining symbol: i
+  [Semantic Trace] Checking variable usage: n
+  [Semantic Trace] Checking variable usage: sum
+  [Semantic Trace] Checking variable usage: i
+  [Semantic Trace] Checking assignment to variable: sum
+  [Semantic Trace] Checking variable usage: sum
+  [Semantic Trace] Exiting function scope: calculate_sum
+  [Semantic Trace] Checking assignment to variable: n
+  [Semantic Trace] Defining symbol: n
+  [Semantic Trace] Checking function call: calculate_sum
+  [Semantic Trace] Checking variable usage: n
+  [Semantic Trace] Checking assignment to variable: result
+  [Semantic Trace] Defining symbol: result
+  [Semantic Trace] Checking variable usage: result
+  [Semantic Trace] Checking IF statement
+  [Semantic Trace] Checking variable usage: result
+-> Semantic Analysis passed successfully.
+
+--- [Phase 4/6] Intermediate Code Generation (TAC) ---
+func begin calculate_sum
+  sum = 0
+  i = 1
+L0:
+  t0 = i <= n
+  if not t0 goto L1
+  t1 = sum + i
+  sum = t1
+  i = i + 1
+  goto L0
+L1:
+  return sum
+func end
+
+  n = 10
+  param n
+  t2 = call calculate_sum, 1
+  result = t2
+  print result
+  t3 = result > 50
+  if not t3 goto L2
+  print 1
+  goto L3
+L2:
+  print 0
+L3:
+-> Intermediate Code Generation complete.
+
+--- [Phase 5/6] Code Optimization ---
+  No constant folding optimizations possible.
+-> Code Optimization complete.
+
+--- [Phase 6/6] Code Generation: C ---
+
+-> Code generation complete. Output saved to: compiler/tests/test_output.c
+
+--- [Phase 7/7] Compiling and Linking C Code ---
+[AlgoCompiler] Linking: gcc compiler/tests/test_output.c -o test_input -lm
+[AlgoCompiler] Success! Run with: ./test_input
+
+--- Compilation Summary ---
+Source: compiler/tests/test_input.alg
+Target C File: compiler/tests/test_output.c
+Executable: test_input
+Status: Success

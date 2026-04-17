@@ -124,7 +124,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 48 "parser.y"
+#line 48 "compiler/parser.y"
 {
     int num;
     float fnum;
@@ -154,7 +154,7 @@ typedef union YYSTYPE
     int level;
 }
 /* Line 1529 of yacc.c.  */
-#line 158 "y.tab.h"
+#line 158 "compiler/y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

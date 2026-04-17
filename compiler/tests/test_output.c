@@ -1,17 +1,22 @@
 #include <stdio.h>
+#include <math.h>
 
-int factorial(int n) {
-    if (n == 0) {
-        return 1;
-    } else {
-        return (n * factorial((n - 1)));
+int calculate_sum(int n) {
+    int sum = 0;
+    for (int i = 1; i <= n; i++) {
+        sum = (sum + i);
     }
+    return sum;
 }
 
 int main() {
-    int n = 5;
-    n = 5;
-    int fact = factorial(n);
-    printf("%d\n", fact);
+    int n = 10;
+    int result = calculate_sum(n);
+    printf("%d\n", result);
+    if (result > 50) {
+        printf("%d\n", 1);
+    } else {
+        printf("%d\n", 0);
+    }
     return 0;
 }

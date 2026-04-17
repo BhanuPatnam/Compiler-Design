@@ -1,0 +1,23 @@
+algocompiler
+============
+
+Usage:
+  algocompiler <input.alg|input.txt> <output.c>
+
+Example:
+  algocompiler program.alg program.c
+
+Install (Debian/Ubuntu):
+  1) Put the .deb file in a folder (Downloads, Desktop, etc.)
+  2) cd into that folder and check the file exists:
+       ls -l *.deb
+  3) Install:
+       sudo apt update
+       sudo apt install -y ./algocompiler_1.0.0_<arch>.deb
+     (Replace <arch> with amd64 or arm64 depending on your system.)
+
+Notes:
+  - This compiler runs multiple phases and also invokes gcc to build the final executable.
+  - If gcc is missing, install it (Debian/Ubuntu):
+      sudo apt update && sudo apt install -y gcc
+

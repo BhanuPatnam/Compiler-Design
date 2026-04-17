@@ -1,0 +1,151 @@
+--- Reading Source File: compiler/tests/try.alg ---
+
+--- [Phase 1/6] Lexical Analysis: Scanning Tokens ---
+Token: FUNCTION     | Value: function
+Token: IDENTIFIER   | Value: find_min
+Token: LPAREN       | Value: (
+Token: IDENTIFIER   | Value: a
+Token: COMMA        | Value: ,
+Token: IDENTIFIER   | Value: b
+Token: RPAREN       | Value: )
+Token: IF           | Value: if
+Token: IDENTIFIER   | Value: a
+Token: LT           | Value: <
+Token: IDENTIFIER   | Value: b
+Token: THEN         | Value: then
+Token: RETURN       | Value: return
+Token: IDENTIFIER   | Value: a
+Token: ELSE         | Value: else
+Token: RETURN       | Value: return
+Token: IDENTIFIER   | Value: b
+Token: END          | Value: end
+Token: IF           | Value: if
+Token: END          | Value: end
+Token: FUNCTION     | Value: function
+Token: IDENTIFIER   | Value: x
+Token: ASSIGN       | Value: <-
+Token: INT_LITERAL  | Value: 10
+Token: IDENTIFIER   | Value: y
+Token: ASSIGN       | Value: <-
+Token: INT_LITERAL  | Value: 20
+Token: IDENTIFIER   | Value: min_val
+Token: ASSIGN       | Value: <-
+Token: IDENTIFIER   | Value: find_min
+Token: LPAREN       | Value: (
+Token: IDENTIFIER   | Value: x
+Token: COMMA        | Value: ,
+Token: IDENTIFIER   | Value: y
+Token: RPAREN       | Value: )
+Token: PRINT        | Value: print
+Token: LPAREN       | Value: (
+Token: IDENTIFIER   | Value: min_val
+Token: RPAREN       | Value: )
+-> Lexical Analysis completed.
+
+--- [Phase 2/6] Syntax Analysis: Parsing ---
+  [Parsing Rule] Return statement matched.
+  [Parsing Rule] Return statement matched.
+  [Parsing Rule] If-Then-Else statement matched.
+  [Parsing Rule] Function definition matched: find_min
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Print statement matched.
+-> Syntax Analysis completed successfully.
+(program
+  (def find_min (a b)
+    (if
+      (binary <
+        (var a)
+        (var b)
+      )
+    then
+      (return
+        (var a)
+      )
+    else
+      (return
+        (var b)
+      )
+    )
+  )
+  (assign
+    (var x)
+    (int 10)
+  )
+  (assign
+    (var y)
+    (int 20)
+  )
+  (assign
+    (var min_val)
+    (call find_min
+      (var x)
+      (var y)
+    )
+  )
+  (print
+    (var min_val)
+  )
+)
+
+--- [Phase 3/6] Semantic Analysis ---
+  [Semantic Trace] Defining function: find_min
+  [Semantic Trace] Checking function definition: find_min
+  [Semantic Trace] Defining symbol: a
+  [Semantic Trace] Defining symbol: b
+  [Semantic Trace] Checking IF statement
+  [Semantic Trace] Checking variable usage: a
+  [Semantic Trace] Checking variable usage: b
+  [Semantic Trace] Checking variable usage: a
+  [Semantic Trace] Checking variable usage: b
+  [Semantic Trace] Exiting function scope: find_min
+  [Semantic Trace] Checking assignment to variable: x
+  [Semantic Trace] Defining symbol: x
+  [Semantic Trace] Checking assignment to variable: y
+  [Semantic Trace] Defining symbol: y
+  [Semantic Trace] Checking function call: find_min
+  [Semantic Trace] Checking variable usage: x
+  [Semantic Trace] Checking variable usage: y
+  [Semantic Trace] Checking assignment to variable: min_val
+  [Semantic Trace] Defining symbol: min_val
+  [Semantic Trace] Checking variable usage: min_val
+-> Semantic Analysis passed successfully.
+
+--- [Phase 4/6] Intermediate Code Generation (TAC) ---
+func begin find_min
+  t0 = a < b
+  if not t0 goto L0
+  return a
+  goto L1
+L0:
+  return b
+L1:
+func end
+
+  x = 10
+  y = 20
+  param x
+  param y
+  t1 = call find_min, 2
+  min_val = t1
+  print min_val
+-> Intermediate Code Generation complete.
+
+--- [Phase 5/6] Code Optimization ---
+  No constant folding optimizations possible.
+-> Code Optimization complete.
+
+--- [Phase 6/6] Code Generation: C ---
+
+-> Code generation complete. Output saved to: compiler/tests/try_output.c
+
+--- [Phase 7/7] Compiling and Linking C Code ---
+[AlgoCompiler] Linking: gcc compiler/tests/try_output.c -o try -lm
+[AlgoCompiler] Success! Run with: ./try
+
+--- Compilation Summary ---
+Source: compiler/tests/try.alg
+Target C File: compiler/tests/try_output.c
+Executable: try
+Status: Success

@@ -63,7 +63,7 @@ const char* get_token_name(int token) {
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        fprintf(stderr, "Usage: %s <input.alg> <output.c>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <input.alg|input.txt> <output.c>\n", argv[0]);
         return 1;
     }
 
@@ -82,10 +82,38 @@ int main(int argc, char* argv[]) {
         strcpy(base_name, filename_start);
     }
 
-    // Check for .alg extension
+    // Redirect ALL compiler output to a .txt log file next to the input file.
+    // This keeps the terminal silent while still saving the full trace.
+    char input_dir[512];
+    if (last_slash) {
+        size_t dir_len = (size_t)(last_slash - input_path + 1); // include trailing '/'
+        if (dir_len >= sizeof(input_dir)) {
+            fprintf(stderr, "Error: Input path is too long.\n");
+            return 1;
+        }
+        strncpy(input_dir, input_path, dir_len);
+        input_dir[dir_len] = '\0';
+    } else {
+        strcpy(input_dir, "");
+    }
+
+    char log_path[1024];
+    snprintf(log_path, sizeof(log_path), "%s%s_compile.txt", input_dir, base_name);
+
+    FILE* log_file = freopen(log_path, "w", stdout);
+    if (!log_file) {
+        fprintf(stderr, "Error: Could not create log file %s\n", log_path);
+        return 1;
+    }
+    if (freopen(log_path, "a", stderr) == NULL) {
+        fprintf(stderr, "Error: Could not redirect stderr to log file %s\n", log_path);
+        return 1;
+    }
+
+    // Check for allowed input extensions (.alg or .txt)
     const char* ext = strrchr(input_path, '.');
-    if (!ext || strcmp(ext, ".alg") != 0) {
-        fprintf(stderr, "Error: Input file must have a .alg extension (found '%s')\n", ext ? ext : "none");
+    if (!ext || (strcmp(ext, ".alg") != 0 && strcmp(ext, ".txt") != 0)) {
+        fprintf(stderr, "Error: Input file must have a .alg or .txt extension (found '%s')\n", ext ? ext : "none");
         return 1;
     }
 

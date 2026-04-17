@@ -150,7 +150,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "parser.y"
+#line 1 "compiler/parser.y"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -218,7 +218,7 @@ ASTNode** add_index(ASTNode** list, int* count, ASTNode* index) {
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 48 "parser.y"
+#line 48 "compiler/parser.y"
 {
     int num;
     float fnum;
@@ -248,7 +248,7 @@ typedef union YYSTYPE
     int level;
 }
 /* Line 193 of yacc.c.  */
-#line 252 "y.tab.c"
+#line 252 "compiler/y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -261,7 +261,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 265 "y.tab.c"
+#line 265 "compiler/y.tab.c"
 
 #ifdef short
 # undef short
@@ -1609,7 +1609,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 104 "parser.y"
+#line 104 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_PROGRAM);
         node->data.program.statements = (yyvsp[(1) - (1)].stmt_list).list;
@@ -1619,7 +1619,7 @@ yyreduce:
     break;
 
   case 3:
-#line 113 "parser.y"
+#line 113 "compiler/parser.y"
     {
         (yyval.stmt_list).list = NULL;
         (yyval.stmt_list).count = 0;
@@ -1627,7 +1627,7 @@ yyreduce:
     break;
 
   case 4:
-#line 117 "parser.y"
+#line 117 "compiler/parser.y"
     {
         (yyval.stmt_list).list = add_stmt((yyvsp[(1) - (2)].stmt_list).list, &(yyvsp[(1) - (2)].stmt_list).count, (yyvsp[(2) - (2)].node));
         (yyval.stmt_list).count = (yyvsp[(1) - (2)].stmt_list).count;
@@ -1635,7 +1635,7 @@ yyreduce:
     break;
 
   case 5:
-#line 124 "parser.y"
+#line 124 "compiler/parser.y"
     {
         printf("  [Parsing Rule] If-Then-Else statement matched.\n");
         ASTNode* node = create_node(NODE_IF_STMT);
@@ -1649,7 +1649,7 @@ yyreduce:
     break;
 
   case 6:
-#line 134 "parser.y"
+#line 134 "compiler/parser.y"
     {
         printf("  [Parsing Rule] If-Then statement matched.\n");
         ASTNode* node = create_node(NODE_IF_STMT);
@@ -1663,7 +1663,7 @@ yyreduce:
     break;
 
   case 7:
-#line 144 "parser.y"
+#line 144 "compiler/parser.y"
     {
         printf("  [Parsing Rule] For loop matched for variable: %s\n", (yyvsp[(2) - (9)].id));
         ASTNode* node = create_node(NODE_FOR_STMT);
@@ -1677,7 +1677,7 @@ yyreduce:
     break;
 
   case 8:
-#line 154 "parser.y"
+#line 154 "compiler/parser.y"
     {
         printf("  [Parsing Rule] While loop matched.\n");
         ASTNode* node = create_node(NODE_WHILE_STMT);
@@ -1689,7 +1689,7 @@ yyreduce:
     break;
 
   case 9:
-#line 162 "parser.y"
+#line 162 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Function definition matched: %s\n", (yyvsp[(2) - (8)].id));
         ASTNode* node = create_node(NODE_FUNCTION_STMT);
@@ -1703,7 +1703,7 @@ yyreduce:
     break;
 
   case 10:
-#line 172 "parser.y"
+#line 172 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Print statement matched.\n");
         ASTNode* node = create_node(NODE_PRINT_STMT);
@@ -1713,7 +1713,7 @@ yyreduce:
     break;
 
   case 11:
-#line 178 "parser.y"
+#line 178 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Return statement matched.\n");
         ASTNode* node = create_node(NODE_RETURN_STMT);
@@ -1723,7 +1723,7 @@ yyreduce:
     break;
 
   case 12:
-#line 184 "parser.y"
+#line 184 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Assignment statement matched.\n");
         ASTNode* node = create_node(NODE_ASSIGNMENT_STMT);
@@ -1734,7 +1734,7 @@ yyreduce:
     break;
 
   case 13:
-#line 191 "parser.y"
+#line 191 "compiler/parser.y"
     { 
         printf("  [Parsing Rule] Variable/Array declaration matched.\n");
         (yyval.node) = (yyvsp[(1) - (1)].node); 
@@ -1742,7 +1742,7 @@ yyreduce:
     break;
 
   case 14:
-#line 195 "parser.y"
+#line 195 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Struct definition matched.\n");
         (yyval.node) = (yyvsp[(1) - (1)].node);
@@ -1750,7 +1750,7 @@ yyreduce:
     break;
 
   case 15:
-#line 202 "parser.y"
+#line 202 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_STRUCT_DEF_STMT);
         node->data.struct_def.struct_name = strdup((yyvsp[(2) - (5)].id));
@@ -1761,7 +1761,7 @@ yyreduce:
     break;
 
   case 16:
-#line 212 "parser.y"
+#line 212 "compiler/parser.y"
     {
         (yyval.stmt_list).list = NULL;
         (yyval.stmt_list).count = 0;
@@ -1769,7 +1769,7 @@ yyreduce:
     break;
 
   case 17:
-#line 216 "parser.y"
+#line 216 "compiler/parser.y"
     {
         (yyval.stmt_list).list = add_stmt((yyvsp[(1) - (2)].stmt_list).list, &(yyvsp[(1) - (2)].stmt_list).count, (yyvsp[(2) - (2)].node));
         (yyval.stmt_list).count = (yyvsp[(1) - (2)].stmt_list).count;
@@ -1777,7 +1777,7 @@ yyreduce:
     break;
 
   case 18:
-#line 223 "parser.y"
+#line 223 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_VARIABLE_EXPR);
         node->data.variable.name = strdup((yyvsp[(1) - (1)].id));
@@ -1786,7 +1786,7 @@ yyreduce:
     break;
 
   case 19:
-#line 228 "parser.y"
+#line 228 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_DEREF_EXPR);
         node->data.deref.name = strdup((yyvsp[(2) - (2)].id));
@@ -1797,7 +1797,7 @@ yyreduce:
     break;
 
   case 20:
-#line 235 "parser.y"
+#line 235 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_ARRAY_ACCESS_EXPR);
         node->data.array_access.name = strdup((yyvsp[(1) - (2)].id));
@@ -1808,7 +1808,7 @@ yyreduce:
     break;
 
   case 21:
-#line 242 "parser.y"
+#line 242 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_STRUCT_MEMBER_ACCESS_EXPR);
         node->data.struct_access.target = (yyvsp[(1) - (3)].node);
@@ -1818,24 +1818,24 @@ yyreduce:
     break;
 
   case 22:
-#line 251 "parser.y"
+#line 251 "compiler/parser.y"
     { (yyval.level) = 1; ;}
     break;
 
   case 23:
-#line 252 "parser.y"
+#line 252 "compiler/parser.y"
     { (yyval.level) = (yyvsp[(1) - (2)].level) + 1; ;}
     break;
 
   case 24:
-#line 256 "parser.y"
+#line 256 "compiler/parser.y"
     {
         (yyval.index_list).list = add_index(NULL, &(yyval.index_list).count, (yyvsp[(2) - (3)].node));
     ;}
     break;
 
   case 25:
-#line 259 "parser.y"
+#line 259 "compiler/parser.y"
     {
         (yyval.index_list).list = add_index((yyvsp[(1) - (4)].index_list).list, &(yyvsp[(1) - (4)].index_list).count, (yyvsp[(3) - (4)].node));
         (yyval.index_list).count = (yyvsp[(1) - (4)].index_list).count;
@@ -1843,7 +1843,7 @@ yyreduce:
     break;
 
   case 26:
-#line 266 "parser.y"
+#line 266 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Simple integer declaration matched.\n");
         ASTNode* node = create_node(NODE_DECL_STMT);
@@ -1854,7 +1854,7 @@ yyreduce:
     break;
 
   case 27:
-#line 273 "parser.y"
+#line 273 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Simple float declaration matched.\n");
         ASTNode* node = create_node(NODE_DECL_STMT);
@@ -1865,7 +1865,7 @@ yyreduce:
     break;
 
   case 28:
-#line 280 "parser.y"
+#line 280 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Simple char declaration matched.\n");
         ASTNode* node = create_node(NODE_DECL_STMT);
@@ -1876,7 +1876,7 @@ yyreduce:
     break;
 
   case 29:
-#line 287 "parser.y"
+#line 287 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Struct instance declaration matched: %s %s\n", (yyvsp[(1) - (2)].id), (yyvsp[(2) - (2)].id));
         ASTNode* node = create_node(NODE_DECL_STMT);
@@ -1889,7 +1889,7 @@ yyreduce:
     break;
 
   case 30:
-#line 296 "parser.y"
+#line 296 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_ARRAY_DECL_STMT);
         node->data.array_decl.name = strdup((yyvsp[(2) - (3)].id));
@@ -1901,7 +1901,7 @@ yyreduce:
     break;
 
   case 31:
-#line 304 "parser.y"
+#line 304 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_ARRAY_DECL_STMT);
         node->data.array_decl.name = strdup((yyvsp[(2) - (3)].id));
@@ -1913,7 +1913,7 @@ yyreduce:
     break;
 
   case 32:
-#line 312 "parser.y"
+#line 312 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_ARRAY_DECL_STMT);
         node->data.array_decl.name = strdup((yyvsp[(2) - (3)].id));
@@ -1925,7 +1925,7 @@ yyreduce:
     break;
 
   case 33:
-#line 320 "parser.y"
+#line 320 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_POINTER_DECL_STMT);
         node->data.pointer_decl.name = strdup((yyvsp[(3) - (3)].id));
@@ -1936,7 +1936,7 @@ yyreduce:
     break;
 
   case 34:
-#line 327 "parser.y"
+#line 327 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_POINTER_DECL_STMT);
         node->data.pointer_decl.name = strdup((yyvsp[(3) - (3)].id));
@@ -1947,7 +1947,7 @@ yyreduce:
     break;
 
   case 35:
-#line 334 "parser.y"
+#line 334 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_POINTER_DECL_STMT);
         node->data.pointer_decl.name = strdup((yyvsp[(3) - (3)].id));
@@ -1958,14 +1958,14 @@ yyreduce:
     break;
 
   case 36:
-#line 344 "parser.y"
+#line 344 "compiler/parser.y"
     {
         (yyval.size_list).list = add_size(NULL, &(yyval.size_list).count, atoi((yyvsp[(2) - (3)].id)));
     ;}
     break;
 
   case 37:
-#line 347 "parser.y"
+#line 347 "compiler/parser.y"
     {
         (yyval.size_list).list = add_size((yyvsp[(1) - (4)].size_list).list, &(yyvsp[(1) - (4)].size_list).count, atoi((yyvsp[(3) - (4)].id)));
         (yyval.size_list).count = (yyvsp[(1) - (4)].size_list).count;
@@ -1973,7 +1973,7 @@ yyreduce:
     break;
 
   case 38:
-#line 354 "parser.y"
+#line 354 "compiler/parser.y"
     {
         (yyval.param_list).list = NULL;
         (yyval.param_list).count = 0;
@@ -1981,14 +1981,14 @@ yyreduce:
     break;
 
   case 39:
-#line 358 "parser.y"
+#line 358 "compiler/parser.y"
     {
         (yyval.param_list).list = add_param(NULL, &(yyval.param_list).count, (yyvsp[(1) - (1)].id));
     ;}
     break;
 
   case 40:
-#line 361 "parser.y"
+#line 361 "compiler/parser.y"
     {
         (yyval.param_list).list = add_param((yyvsp[(1) - (3)].param_list).list, &(yyvsp[(1) - (3)].param_list).count, (yyvsp[(3) - (3)].id));
         (yyval.param_list).count = (yyvsp[(1) - (3)].param_list).count;
@@ -1996,12 +1996,12 @@ yyreduce:
     break;
 
   case 41:
-#line 368 "parser.y"
+#line 368 "compiler/parser.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); ;}
     break;
 
   case 42:
-#line 369 "parser.y"
+#line 369 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Binary Expression (+) matched.\n");
         ASTNode* node = create_node(NODE_BINARY_EXPR);
@@ -2013,7 +2013,7 @@ yyreduce:
     break;
 
   case 43:
-#line 377 "parser.y"
+#line 377 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Binary Expression (-) matched.\n");
         ASTNode* node = create_node(NODE_BINARY_EXPR);
@@ -2025,7 +2025,7 @@ yyreduce:
     break;
 
   case 44:
-#line 385 "parser.y"
+#line 385 "compiler/parser.y"
     {
         printf("  [Parsing Rule] Comparison Expression (=) matched.\n");
         ASTNode* node = create_node(NODE_BINARY_EXPR);
@@ -2037,7 +2037,7 @@ yyreduce:
     break;
 
   case 45:
-#line 393 "parser.y"
+#line 393 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_BINARY_EXPR);
         node->data.binary.op = strdup("≠");
@@ -2048,7 +2048,7 @@ yyreduce:
     break;
 
   case 46:
-#line 400 "parser.y"
+#line 400 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_BINARY_EXPR);
         node->data.binary.op = strdup("<");
@@ -2059,7 +2059,7 @@ yyreduce:
     break;
 
   case 47:
-#line 407 "parser.y"
+#line 407 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_BINARY_EXPR);
         node->data.binary.op = strdup(">");
@@ -2070,7 +2070,7 @@ yyreduce:
     break;
 
   case 48:
-#line 414 "parser.y"
+#line 414 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_BINARY_EXPR);
         node->data.binary.op = strdup("≤");
@@ -2081,7 +2081,7 @@ yyreduce:
     break;
 
   case 49:
-#line 421 "parser.y"
+#line 421 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_BINARY_EXPR);
         node->data.binary.op = strdup("≥");
@@ -2092,12 +2092,12 @@ yyreduce:
     break;
 
   case 50:
-#line 431 "parser.y"
+#line 431 "compiler/parser.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); ;}
     break;
 
   case 51:
-#line 432 "parser.y"
+#line 432 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_BINARY_EXPR);
         node->data.binary.op = strdup("*");
@@ -2108,7 +2108,7 @@ yyreduce:
     break;
 
   case 52:
-#line 439 "parser.y"
+#line 439 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_BINARY_EXPR);
         node->data.binary.op = strdup("/");
@@ -2119,12 +2119,12 @@ yyreduce:
     break;
 
   case 53:
-#line 449 "parser.y"
+#line 449 "compiler/parser.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); ;}
     break;
 
   case 54:
-#line 450 "parser.y"
+#line 450 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_FUNCTION_CALL_EXPR);
         node->data.func_call.name = strdup((yyvsp[(1) - (4)].id));
@@ -2135,7 +2135,7 @@ yyreduce:
     break;
 
   case 55:
-#line 457 "parser.y"
+#line 457 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_ADDR_OF_EXPR);
         node->data.addr_of.name = strdup((yyvsp[(2) - (2)].id));
@@ -2144,7 +2144,7 @@ yyreduce:
     break;
 
   case 56:
-#line 462 "parser.y"
+#line 462 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_DEREF_EXPR);
         node->data.deref.name = strdup((yyvsp[(2) - (2)].id));
@@ -2155,7 +2155,7 @@ yyreduce:
     break;
 
   case 57:
-#line 469 "parser.y"
+#line 469 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_ARRAY_ACCESS_EXPR);
         node->data.array_access.name = strdup((yyvsp[(1) - (2)].id));
@@ -2166,7 +2166,7 @@ yyreduce:
     break;
 
   case 58:
-#line 476 "parser.y"
+#line 476 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_STRUCT_MEMBER_ACCESS_EXPR);
         node->data.struct_access.target = (yyvsp[(1) - (3)].node);
@@ -2176,7 +2176,7 @@ yyreduce:
     break;
 
   case 59:
-#line 485 "parser.y"
+#line 485 "compiler/parser.y"
     {
         (yyval.arg_list).list = NULL;
         (yyval.arg_list).count = 0;
@@ -2184,14 +2184,14 @@ yyreduce:
     break;
 
   case 60:
-#line 489 "parser.y"
+#line 489 "compiler/parser.y"
     {
         (yyval.arg_list).list = add_arg(NULL, &(yyval.arg_list).count, (yyvsp[(1) - (1)].node));
     ;}
     break;
 
   case 61:
-#line 492 "parser.y"
+#line 492 "compiler/parser.y"
     {
         (yyval.arg_list).list = add_arg((yyvsp[(1) - (3)].arg_list).list, &(yyvsp[(1) - (3)].arg_list).count, (yyvsp[(3) - (3)].node));
         (yyval.arg_list).count = (yyvsp[(1) - (3)].arg_list).count;
@@ -2199,7 +2199,7 @@ yyreduce:
     break;
 
   case 62:
-#line 499 "parser.y"
+#line 499 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_INT_EXPR);
         node->data.int_expr.value = atoi((yyvsp[(1) - (1)].id));
@@ -2208,7 +2208,7 @@ yyreduce:
     break;
 
   case 63:
-#line 504 "parser.y"
+#line 504 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_FLOAT_EXPR);
         node->data.float_expr.value = atof((yyvsp[(1) - (1)].id));
@@ -2217,7 +2217,7 @@ yyreduce:
     break;
 
   case 64:
-#line 509 "parser.y"
+#line 509 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_CHAR_EXPR);
         // $1 is 'c', we want the character at index 1
@@ -2227,7 +2227,7 @@ yyreduce:
     break;
 
   case 65:
-#line 515 "parser.y"
+#line 515 "compiler/parser.y"
     {
         ASTNode* node = create_node(NODE_VARIABLE_EXPR);
         node->data.variable.name = strdup((yyvsp[(1) - (1)].id));
@@ -2236,7 +2236,7 @@ yyreduce:
     break;
 
   case 66:
-#line 520 "parser.y"
+#line 520 "compiler/parser.y"
     {
         (yyval.node) = (yyvsp[(2) - (3)].node);
     ;}
@@ -2244,7 +2244,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2248 "y.tab.c"
+#line 2248 "compiler/y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2458,7 +2458,7 @@ yyreturn:
 }
 
 
-#line 525 "parser.y"
+#line 525 "compiler/parser.y"
 
 
 void yyerror(const char *s) {

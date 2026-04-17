@@ -1,0 +1,288 @@
+--- Reading Source File: compiler/tests/test_arrays.alg ---
+
+--- [Phase 1/6] Lexical Analysis: Scanning Tokens ---
+Token: INT_TYPE     | Value: int
+Token: IDENTIFIER   | Value: arr
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 5
+Token: RBRACKET     | Value: ]
+Token: IDENTIFIER   | Value: arr
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 0
+Token: RBRACKET     | Value: ]
+Token: ASSIGN       | Value: <-
+Token: INT_LITERAL  | Value: 10
+Token: IDENTIFIER   | Value: arr
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 1
+Token: RBRACKET     | Value: ]
+Token: ASSIGN       | Value: <-
+Token: INT_LITERAL  | Value: 20
+Token: IDENTIFIER   | Value: arr
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 2
+Token: RBRACKET     | Value: ]
+Token: ASSIGN       | Value: <-
+Token: IDENTIFIER   | Value: arr
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 0
+Token: RBRACKET     | Value: ]
+Token: PLUS         | Value: +
+Token: IDENTIFIER   | Value: arr
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 1
+Token: RBRACKET     | Value: ]
+Token: PRINT        | Value: print
+Token: LPAREN       | Value: (
+Token: IDENTIFIER   | Value: arr
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 2
+Token: RBRACKET     | Value: ]
+Token: RPAREN       | Value: )
+Token: INT_TYPE     | Value: int
+Token: IDENTIFIER   | Value: matrix
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 2
+Token: RBRACKET     | Value: ]
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 2
+Token: RBRACKET     | Value: ]
+Token: IDENTIFIER   | Value: matrix
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 0
+Token: RBRACKET     | Value: ]
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 0
+Token: RBRACKET     | Value: ]
+Token: ASSIGN       | Value: <-
+Token: INT_LITERAL  | Value: 1
+Token: IDENTIFIER   | Value: matrix
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 0
+Token: RBRACKET     | Value: ]
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 1
+Token: RBRACKET     | Value: ]
+Token: ASSIGN       | Value: <-
+Token: INT_LITERAL  | Value: 2
+Token: IDENTIFIER   | Value: matrix
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 1
+Token: RBRACKET     | Value: ]
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 0
+Token: RBRACKET     | Value: ]
+Token: ASSIGN       | Value: <-
+Token: INT_LITERAL  | Value: 3
+Token: IDENTIFIER   | Value: matrix
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 1
+Token: RBRACKET     | Value: ]
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 1
+Token: RBRACKET     | Value: ]
+Token: ASSIGN       | Value: <-
+Token: IDENTIFIER   | Value: matrix
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 0
+Token: RBRACKET     | Value: ]
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 0
+Token: RBRACKET     | Value: ]
+Token: PLUS         | Value: +
+Token: IDENTIFIER   | Value: matrix
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 0
+Token: RBRACKET     | Value: ]
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 1
+Token: RBRACKET     | Value: ]
+Token: PLUS         | Value: +
+Token: IDENTIFIER   | Value: matrix
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 1
+Token: RBRACKET     | Value: ]
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 0
+Token: RBRACKET     | Value: ]
+Token: PRINT        | Value: print
+Token: LPAREN       | Value: (
+Token: IDENTIFIER   | Value: matrix
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 1
+Token: RBRACKET     | Value: ]
+Token: LBRACKET     | Value: [
+Token: INT_LITERAL  | Value: 1
+Token: RBRACKET     | Value: ]
+Token: RPAREN       | Value: )
+-> Lexical Analysis completed.
+
+--- [Phase 2/6] Syntax Analysis: Parsing ---
+  [Parsing Rule] Variable/Array declaration matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Binary Expression (+) matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Print statement matched.
+  [Parsing Rule] Variable/Array declaration matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Binary Expression (+) matched.
+  [Parsing Rule] Binary Expression (+) matched.
+  [Parsing Rule] Assignment statement matched.
+  [Parsing Rule] Print statement matched.
+-> Syntax Analysis completed successfully.
+(program
+  (array_decl arr dims=1 int)
+  (assign
+    (array_access arr
+      (int 0)
+    )
+    (int 10)
+  )
+  (assign
+    (array_access arr
+      (int 1)
+    )
+    (int 20)
+  )
+  (assign
+    (array_access arr
+      (int 2)
+    )
+    (binary +
+      (array_access arr
+        (int 0)
+      )
+      (array_access arr
+        (int 1)
+      )
+    )
+  )
+  (print
+    (array_access arr
+      (int 2)
+    )
+  )
+  (array_decl matrix dims=2 int)
+  (assign
+    (array_access matrix
+      (int 0)
+      (int 0)
+    )
+    (int 1)
+  )
+  (assign
+    (array_access matrix
+      (int 0)
+      (int 1)
+    )
+    (int 2)
+  )
+  (assign
+    (array_access matrix
+      (int 1)
+      (int 0)
+    )
+    (int 3)
+  )
+  (assign
+    (array_access matrix
+      (int 1)
+      (int 1)
+    )
+    (binary +
+      (binary +
+        (array_access matrix
+          (int 0)
+          (int 0)
+        )
+        (array_access matrix
+          (int 0)
+          (int 1)
+        )
+      )
+      (array_access matrix
+        (int 1)
+        (int 0)
+      )
+    )
+  )
+  (print
+    (array_access matrix
+      (int 1)
+      (int 1)
+    )
+  )
+)
+
+--- [Phase 3/6] Semantic Analysis ---
+  [Semantic Trace] Checking array declaration: arr
+  [Semantic Trace] Defining symbol: arr
+  [Semantic Trace] Checking assignment to complex target
+  [Semantic Trace] Checking array access: arr
+  [Semantic Trace] Checking assignment to complex target
+  [Semantic Trace] Checking array access: arr
+  [Semantic Trace] Checking array access: arr
+  [Semantic Trace] Checking array access: arr
+  [Semantic Trace] Checking assignment to complex target
+  [Semantic Trace] Checking array access: arr
+  [Semantic Trace] Checking array access: arr
+  [Semantic Trace] Checking array declaration: matrix
+  [Semantic Trace] Defining symbol: matrix
+  [Semantic Trace] Checking assignment to complex target
+  [Semantic Trace] Checking array access: matrix
+  [Semantic Trace] Checking assignment to complex target
+  [Semantic Trace] Checking array access: matrix
+  [Semantic Trace] Checking assignment to complex target
+  [Semantic Trace] Checking array access: matrix
+  [Semantic Trace] Checking array access: matrix
+  [Semantic Trace] Checking array access: matrix
+  [Semantic Trace] Checking array access: matrix
+  [Semantic Trace] Checking assignment to complex target
+  [Semantic Trace] Checking array access: matrix
+  [Semantic Trace] Checking array access: matrix
+-> Semantic Analysis passed successfully.
+
+--- [Phase 4/6] Intermediate Code Generation (TAC) ---
+  alloc arr, 5
+  arr[0] = 10
+  arr[1] = 20
+  t0 = arr[0]
+  t1 = arr[1]
+  t2 = t0 + t1
+  arr[2] = t2
+  t3 = arr[2]
+  print t3
+  alloc matrix, 2
+  matrix[0] = 1
+  matrix[0] = 2
+  matrix[1] = 3
+  t4 = matrix[0]
+  t5 = matrix[0]
+  t6 = t4 + t5
+  t7 = matrix[1]
+  t8 = t6 + t7
+  matrix[1] = t8
+  t9 = matrix[1]
+  print t9
+-> Intermediate Code Generation complete.
+
+--- [Phase 5/6] Code Optimization ---
+  No constant folding optimizations possible.
+-> Code Optimization complete.
+
+--- [Phase 6/6] Code Generation: C ---
+
+-> Code generation complete. Output saved to: compiler/tests/test_arrays_output.c
+
+--- [Phase 7/7] Compiling and Linking C Code ---
+[AlgoCompiler] Linking: gcc compiler/tests/test_arrays_output.c -o test_arrays -lm
+[AlgoCompiler] Success! Run with: ./test_arrays
+
+--- Compilation Summary ---
+Source: compiler/tests/test_arrays.alg
+Target C File: compiler/tests/test_arrays_output.c
+Executable: test_arrays
+Status: Success
